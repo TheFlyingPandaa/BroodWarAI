@@ -11,6 +11,8 @@ BWTA::Region* enemy_base;
 //when a new game has been started with the bot.
 void ExampleAIModule::onStart()
 {
+
+	strategy = StrategyBuild();
 	Broodwar->sendText("Hello world!");
 	//Enable flags
 	Broodwar->enableFlag(Flag::UserInput);
@@ -151,7 +153,7 @@ void ExampleAIModule::onFrame()
 				}
 			}
 		}
-		if (Broodwar->self()->minerals() >= 100)
+		/*if (Broodwar->self()->minerals() >= 100)
 		{
 			UnitType type = UnitTypes::Enum::Terran_Supply_Depot;
 			TilePosition destPos;
@@ -167,10 +169,27 @@ void ExampleAIModule::onFrame()
 					break;
 				}
 			}
-
 		
+		}*/
+
+		if (Broodwar->self()->minerals() >= strategy.getMiniralGoal())
+		{
+			UnitType type = strategy.getCurrentBuild();
+			TilePosition destPos;
 			
-			
+			for (auto JIM : Broodwar->self()->getUnits())
+			{
+				if (JIM->getType().isWorker())
+				{
+					destPos = JIM->getTilePosition();
+					TilePosition buildPos = Broodwar->getBuildLocation(type, destPos, 63, false);
+					Broodwar->drawBox(CoordinateType::Map, buildPos.x * 32, buildPos.y * 32, buildPos.x * 32 + 4 * 32, buildPos.y * 32 + 3 * 32, Colors::Red, false);
+					JIM->build(type, buildPos);
+					Broodwar->printf("%d", strategy.getBuildStage());
+					strategy.buildingBuilt();
+					break;
+				}
+			}
 		}
 		
 	}

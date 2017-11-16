@@ -3,6 +3,8 @@
 
 #include <BWTA.h>
 #include <windows.h>
+//#include "StrategyBuild.h"
+#include "../StrategyBuild.h"
 
 extern bool analyzed;
 extern bool analysis_just_finished;
@@ -47,4 +49,7 @@ public:
 
 private:
 	int amountOfWorkes;
+
+	StrategyBuild strategy;
+
 };
