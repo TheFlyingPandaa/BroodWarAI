@@ -132,27 +132,49 @@ void ExampleAIModule::onFrame()
 		{
 			if (unit->isIdle())
 			{
-				Unit closestMineral = NULL;
-				for (auto m : Broodwar->getMinerals())
+				if (unit->getType().isWorker())
 				{
-					if (closestMineral == NULL || unit->getDistance(m) < unit->getDistance(closestMineral))
+					Unit closestMineral = NULL;
+					for (auto m : Broodwar->getMinerals())
 					{
-						closestMineral = m;
+						if (closestMineral == NULL || unit->getDistance(m) < unit->getDistance(closestMineral))
+						{
+							closestMineral = m;
+						}
+					}
+					if (closestMineral != NULL)
+					{
+						unit->rightClick(closestMineral);
+						Broodwar->printf("Send worker %d to mineral %d", unit->getID(), closestMineral->getID());
+						break;
 					}
 				}
-				if (closestMineral != NULL)
+			}
+		}
+		if (Broodwar->self()->minerals() >= 100)
+		{
+			UnitType type = UnitTypes::Enum::Terran_Supply_Depot;
+			TilePosition destPos;
+			
+			for (auto JIM : Broodwar->self()->getUnits())
+			{
+				if (JIM->getType().isWorker())
 				{
-					unit->rightClick(closestMineral);
-					Broodwar->printf("Send worker %d to mineral %d", unit->getID(), closestMineral->getID());
+					destPos = JIM->getTilePosition();
+					TilePosition buildPos = Broodwar->getBuildLocation(type, destPos, 63, false);
+					Broodwar->drawBox(CoordinateType::Map, buildPos.x * 32, buildPos.y * 32, buildPos.x * 32 + 4 * 32, buildPos.y * 32 + 3 * 32, Colors::Red, false);
+					JIM->build(type, buildPos);
 					break;
 				}
 			}
+
+		
+			
+			
 		}
 		
 	}
 	
-	
-
 	
 
 	//Draw lines around regions, chokepoints etc.
