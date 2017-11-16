@@ -41,4 +41,10 @@ public:
 	void showPlayers();
 	void showForces();
 	Position findGuardPoint();
+
+	//SENDING ALL THE JIMs TO THE FIELDS
+	void sendWorkersToMinirals();
+
+private:
+	int amountOfWorkes;
 };

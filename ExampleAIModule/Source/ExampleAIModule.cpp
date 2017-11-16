@@ -6,6 +6,7 @@ bool analysis_just_finished;
 BWTA::Region* home;
 BWTA::Region* enemy_base;
 
+
 //This is the startup method. It is called once
 //when a new game has been started with the bot.
 void ExampleAIModule::onStart()
@@ -15,6 +16,8 @@ void ExampleAIModule::onStart()
 	Broodwar->enableFlag(Flag::UserInput);
 	//Uncomment to enable complete map information
 	//Broodwar->enableFlag(Flag::CompleteMapInformation);
+	
+	this->amountOfWorkes = 5;
 
 	//Start analyzing map data
 	BWTA::readMap();
@@ -24,25 +27,7 @@ void ExampleAIModule::onStart()
 	AnalyzeThread();
 
 	//Send each worker to the mineral field that is closest to it
-	for (auto u : Broodwar->self()->getUnits())
-	{
-		if (u->getType().isWorker())
-		{
-			Unit closestMineral = NULL;
-			for (auto m : Broodwar->getMinerals())
-			{
-				if (closestMineral == NULL || u->getDistance(m) < u->getDistance(closestMineral))
-				{
-					closestMineral = m;
-				}
-			}
-			if (closestMineral != NULL)
-			{
-				u->rightClick(closestMineral);
-				Broodwar->printf("Send worker %d to mineral %d", u->getID(), closestMineral->getID());
-			}
-		}
-	}
+	sendWorkersToMinirals();
 }
 
 //Called when a game is ended.
@@ -79,6 +64,30 @@ Position ExampleAIModule::findGuardPoint()
 	return choke->getCenter();
 }
 
+void ExampleAIModule::sendWorkersToMinirals()
+{
+	for (auto u : Broodwar->self()->getUnits())
+	{
+		if (u->getType().isWorker())
+		{
+			Unit closestMineral = NULL;
+			for (auto m : Broodwar->getMinerals())
+			{
+				if (closestMineral == NULL || u->getDistance(m) < u->getDistance(closestMineral))
+				{
+					closestMineral = m;
+				}
+			}
+			if (closestMineral != NULL)
+			{
+				u->rightClick(closestMineral);
+				Broodwar->printf("Send worker %d to mineral %d", u->getID(), closestMineral->getID());
+			}
+		}
+	}
+}
+
+
 //This is the method called each frame. This is where the bot's logic
 //shall be called.
 void ExampleAIModule::onFrame()
@@ -86,6 +95,9 @@ void ExampleAIModule::onFrame()
 	//Call every 100:th frame
 	if (Broodwar->getFrameCount() % 100 == 0)
 	{
+		
+		Broodwar->printf("miniral amout %d", Broodwar->self()->minerals());
+		/*
 		//Order one of our workers to guard our chokepoint.
 		//Iterate through the list of units.
 		for (auto u : Broodwar->self()->getUnits())
@@ -101,7 +113,47 @@ void ExampleAIModule::onFrame()
 				break;
 			}
 		}
+		*/
+		for (auto unit : Broodwar->self()->getUnits())
+		{
+			if (unit->getType() == Broodwar->self()->getRace().getCenter())
+			{
+				if (Broodwar->self()->minerals() >= 50 && this->amountOfWorkes < 9)
+				{
+					unit->train(UnitTypes::Enum::Terran_SCV);
+					this->amountOfWorkes++;
+					break;
+				}
+			}
+
+		}
+
+		for (auto unit : Broodwar->self()->getUnits())
+		{
+			if (unit->isIdle())
+			{
+				Unit closestMineral = NULL;
+				for (auto m : Broodwar->getMinerals())
+				{
+					if (closestMineral == NULL || unit->getDistance(m) < unit->getDistance(closestMineral))
+					{
+						closestMineral = m;
+					}
+				}
+				if (closestMineral != NULL)
+				{
+					unit->rightClick(closestMineral);
+					Broodwar->printf("Send worker %d to mineral %d", unit->getID(), closestMineral->getID());
+					break;
+				}
+			}
+		}
+		
 	}
+	
+	
+
+	
 
 	//Draw lines around regions, chokepoints etc.
 	if (analyzed)
@@ -134,6 +186,7 @@ void ExampleAIModule::onSendText(std::string text)
 void ExampleAIModule::onReceiveText(BWAPI::Player player, std::string text)
 {
 	Broodwar->printf("%s said '%s'", player->getName().c_str(), text.c_str());
+	
 }
 
 //Called when a player leaves the game.
