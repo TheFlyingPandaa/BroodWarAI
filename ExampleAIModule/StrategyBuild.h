@@ -18,7 +18,7 @@ public:
 	void buildingBuilt();
 private:
 
-	//Pallar inte göra en class för detta
+	//Pallar inte göra en Glass för detta
 	BWAPI::UnitType buildOrder[2];
 	int miniralGoal[2];
 

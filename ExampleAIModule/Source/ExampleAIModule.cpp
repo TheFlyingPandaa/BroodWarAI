@@ -179,14 +179,20 @@ void ExampleAIModule::onFrame()
 			
 			for (auto JIM : Broodwar->self()->getUnits())
 			{
-				if (JIM->getType().isWorker())
+				if (JIM->getType().isWorker() && JIM->isGatheringMinerals() || JIM->isIdle())
 				{
 					destPos = JIM->getTilePosition();
 					TilePosition buildPos = Broodwar->getBuildLocation(type, destPos, 63, false);
 					Broodwar->drawBox(CoordinateType::Map, buildPos.x * 32, buildPos.y * 32, buildPos.x * 32 + 4 * 32, buildPos.y * 32 + 3 * 32, Colors::Red, false);
+					
 					JIM->build(type, buildPos);
 					Broodwar->printf("%d", strategy.getBuildStage());
 					strategy.buildingBuilt();
+					/*//W
+					if (JIM->getRemainingBuildTime() <= 0)
+					{
+						JIM->build(type, buildPos);
+					}*/
 					break;
 				}
 			}
