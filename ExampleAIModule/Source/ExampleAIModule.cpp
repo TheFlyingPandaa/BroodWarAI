@@ -12,7 +12,9 @@ BWTA::Region* enemy_base;
 void ExampleAIModule::onStart()
 {
 
-	strategy = StrategyBuild();
+	strategyBuild = StrategyBuild();
+	strategyTrain = StrategyTrain();
+
 	Broodwar->sendText("Hello world!");
 	//Enable flags
 	Broodwar->enableFlag(Flag::UserInput);
@@ -116,43 +118,38 @@ void ExampleAIModule::onFrame()
 			}
 		}
 		*/
-		for (auto unit : Broodwar->self()->getUnits())
+		if (Broodwar->self()->minerals() >= strategyTrain.getUnitCostGoal())
 		{
-			if (unit->getType() == Broodwar->self()->getRace().getCenter())
+			for (auto building : Broodwar->self()->getUnits())
 			{
-				if (Broodwar->self()->minerals() >= 50 && this->amountOfWorkes < 9)
+				//WHY BE LIKE THE REST. NAHH PUT 0 AS FINNISHED EVER HEARD OF -1
+				if (building->getType() == strategyTrain.getUnitBuildning() && building->getRemainingBuildTime() < 1)
 				{
-					unit->train(UnitTypes::Enum::Terran_SCV);
-					this->amountOfWorkes++;
-					break;
-				}
-			}
+					UnitType::list queueCheck = building->getTrainingQueue();
 
-		}
+					if (queueCheck.size() <= 4)
+					{
 
-		for (auto unit : Broodwar->self()->getUnits())
-		{
-			if (unit->isIdle())
-			{
-				if (unit->getType().isWorker())
-				{
-					Unit closestMineral = NULL;
-					for (auto m : Broodwar->getMinerals())
-					{
-						if (closestMineral == NULL || unit->getDistance(m) < unit->getDistance(closestMineral))
-						{
-							closestMineral = m;
-						}
-					}
-					if (closestMineral != NULL)
-					{
-						unit->rightClick(closestMineral);
-						Broodwar->printf("Send worker %d to mineral %d", unit->getID(), closestMineral->getID());
+						building->train(strategyTrain.getUnitOrder());
+						//building->train(strategyTrain.getUnitOrder());
+						strategyTrain.trainedUnit();
+						Broodwar->printf("Amount Of units left %d", strategyTrain.getAmountOfUnits());
+						Broodwar->printf("current Stage %d", strategyTrain.getTrainOrder());
 						break;
 					}
+					else
+					{
+						Broodwar->printf("Spagetiooo queue is full");
+
+					}
+					
+
 				}
+
 			}
 		}
+
+		
 		/*if (Broodwar->self()->minerals() >= 100)
 		{
 			UnitType type = UnitTypes::Enum::Terran_Supply_Depot;
@@ -172,9 +169,9 @@ void ExampleAIModule::onFrame()
 		
 		}*/
 
-		if (Broodwar->self()->minerals() >= strategy.getMiniralGoal())
+		if (Broodwar->self()->minerals() >= strategyBuild.getMiniralGoal())
 		{
-			UnitType type = strategy.getCurrentBuild();
+			UnitType type = strategyBuild.getCurrentBuild();
 			TilePosition destPos;
 			
 			for (auto JIM : Broodwar->self()->getUnits())
@@ -186,13 +183,15 @@ void ExampleAIModule::onFrame()
 					Broodwar->drawBox(CoordinateType::Map, buildPos.x * 32, buildPos.y * 32, buildPos.x * 32 + 4 * 32, buildPos.y * 32 + 3 * 32, Colors::Red, false);
 					
 					JIM->build(type, buildPos);
-					Broodwar->printf("%d", strategy.getBuildStage());
-					strategy.buildingBuilt();
-					/*//W
+					Broodwar->printf("Build stage %d", strategyBuild.getBuildStage());
+
+
+					strategyBuild.buildingBuilt();
+					//W
 					if (JIM->getRemainingBuildTime() <= 0)
 					{
 						JIM->build(type, buildPos);
-					}*/
+					}
 					break;
 				}
 			}
@@ -290,6 +289,8 @@ void ExampleAIModule::onUnitCreate(BWAPI::Unit unit)
 	{
 		Broodwar->sendText("A %s [%x] has been created at (%d,%d)", unit->getType().getName().c_str(), unit, unit->getPosition().x, unit->getPosition().y);
 	}
+
+	
 }
 
 //Called when a unit has been destroyed.
@@ -448,5 +449,29 @@ void ExampleAIModule::showForces()
 //Called when a unit has been completed, i.e. finished built.
 void ExampleAIModule::onUnitComplete(BWAPI::Unit unit)
 {
-	//Broodwar->sendText("A %s [%x] has been completed at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x,unit->getPosition().y);
+	Broodwar->sendText("A %s [%x] has been completed at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x,unit->getPosition().y);
+
+	for (auto unit : Broodwar->self()->getUnits())
+	{
+		if (unit->isIdle())
+		{
+			if (unit->getType().isWorker())
+			{
+				Unit closestMineral = NULL;
+				for (auto m : Broodwar->getMinerals())
+				{
+					if (closestMineral == NULL || unit->getDistance(m) < unit->getDistance(closestMineral))
+					{
+						closestMineral = m;
+					}
+				}
+				if (closestMineral != NULL)
+				{
+					unit->rightClick(closestMineral);
+					//Broodwar->printf("Send worker %d to mineral %d", unit->getID(), closestMineral->getID());
+					break;
+				}
+			}
+		}
+	}
 }

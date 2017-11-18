@@ -5,6 +5,7 @@
 #include <windows.h>
 //#include "StrategyBuild.h"
 #include "../StrategyBuild.h"
+#include "../StrategyTrain.h"
 
 extern bool analyzed;
 extern bool analysis_just_finished;
@@ -50,6 +51,7 @@ public:
 private:
 	int amountOfWorkes;
 
-	StrategyBuild strategy;
-
+	StrategyBuild strategyBuild;
+	
+	StrategyTrain strategyTrain;
 };

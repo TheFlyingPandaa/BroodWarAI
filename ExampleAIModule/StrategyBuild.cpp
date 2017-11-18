@@ -9,6 +9,7 @@ StrategyBuild::StrategyBuild()
 
 	this->miniralGoal[0] = 100;
 	this->miniralGoal[1] = 150;
+	//this->miniralGoal[3] = 10000;
 
 
 }
