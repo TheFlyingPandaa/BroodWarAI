@@ -91,16 +91,83 @@ void ExampleAIModule::sendWorkersToMinirals()
 	}
 }
 
+void ExampleAIModule::buildCommandCenter()
+{
+
+	TilePosition startPos;
+	for (Unit c : Broodwar->self()->getUnits())
+	{
+		if (c->getType() == BWAPI::UnitTypes::Enum::Terran_Command_Center)
+		{
+			startPos = c->getTilePosition();
+		}
+	}
+
+	TilePosition cPos;
+	for (auto center : BWTA::getBaseLocations())
+	{
+		if (center->isStartLocation())
+		{
+			startPos = center->getTilePosition();
+			cPos.x = 2000000;
+			cPos.y = 2000000;
+		}
+	}
+
+	for (auto center : BWTA::getBaseLocations())
+	{
+		if (startPos.getDistance(center->getTilePosition()) < startPos.getDistance(cPos))
+		{
+			if (startPos.getDistance(startPos) != startPos.getDistance(center->getTilePosition()))
+			{
+				cPos = center->getTilePosition();
+			}
+		}
+	}
+
+	for (auto JIM : Broodwar->self()->getUnits() )
+	{
+		if (JIM->getType().isWorker() && JIM->isGatheringMinerals() || JIM->isIdle())
+		{
+			UnitType type = BWAPI::UnitTypes::Enum::Terran_Command_Center;
+			//TilePosition buildPos = Broodwar->getBuildLocation(type , cPos, 63, false);
+			for (size_t i = 0; i < 10; i++)
+			{
+				JIM->build(type, cPos);
+			}
+			Broodwar->drawBox(CoordinateType::Map, cPos.x * 32, cPos.y * 32, cPos.x * 32 + 4 * 32, cPos.y * 32 + 3 * 32, Colors::Red, false);
+
+
+			Broodwar->printf("Build stage %d", strategyBuild.getBuildStage());
+
+
+			strategyBuild.buildingBuilt();
+			//W
+			if (JIM->getRemainingBuildTime() <= 0)
+			{
+				JIM->build(type, cPos);
+			}
+			break;
+		}
+	}
+
+}
+
+
 
 //This is the method called each frame. This is where the bot's logic
 //shall be called.
 void ExampleAIModule::onFrame()
 {
+	
+	//buildCommandCenter();
 	//Call every 100:th frame
 	if (Broodwar->getFrameCount() % 100 == 0)
 	{
 		
 		Broodwar->printf("miniral amout %d", Broodwar->self()->minerals());
+		
+
 		/*
 		//Order one of our workers to guard our chokepoint.
 		//Iterate through the list of units.
@@ -173,26 +240,36 @@ void ExampleAIModule::onFrame()
 		{
 			UnitType type = strategyBuild.getCurrentBuild();
 			TilePosition destPos;
-			
-			for (auto JIM : Broodwar->self()->getUnits())
+			if (strategyBuild.getIsCommandCenter())
 			{
-				if (JIM->getType().isWorker() && JIM->isGatheringMinerals() || JIM->isIdle())
+				buildCommandCenter();
+			}
+			else {
+				for (auto JIM : Broodwar->self()->getUnits())
 				{
-					destPos = JIM->getTilePosition();
-					TilePosition buildPos = Broodwar->getBuildLocation(type, destPos, 63, false);
-					Broodwar->drawBox(CoordinateType::Map, buildPos.x * 32, buildPos.y * 32, buildPos.x * 32 + 4 * 32, buildPos.y * 32 + 3 * 32, Colors::Red, false);
-					
-					JIM->build(type, buildPos);
-					Broodwar->printf("Build stage %d", strategyBuild.getBuildStage());
-
-
-					strategyBuild.buildingBuilt();
-					//W
-					if (JIM->getRemainingBuildTime() <= 0)
+					if (JIM->getType().isWorker() && JIM->isGatheringMinerals() || JIM->isIdle())
 					{
-						JIM->build(type, buildPos);
+
+						destPos = JIM->getTilePosition();
+						TilePosition buildPos = Broodwar->getBuildLocation(type, destPos, 63, false);
+						for (size_t i = 0; i < 10; i++)
+						{
+							JIM->build(type, buildPos);
+						}
+						Broodwar->drawBox(CoordinateType::Map, buildPos.x * 32, buildPos.y * 32, buildPos.x * 32 + 4 * 32, buildPos.y * 32 + 3 * 32, Colors::Red, false);
+
+
+						Broodwar->printf("Build stage %d", strategyBuild.getBuildStage());
+
+
+						strategyBuild.buildingBuilt();
+						//W
+						if (JIM->getRemainingBuildTime() <= 0)
+						{
+							JIM->build(type, buildPos);
+						}
+						break;
 					}
-					break;
 				}
 			}
 		}
@@ -205,6 +282,7 @@ void ExampleAIModule::onFrame()
 	if (analyzed)
 	{
 		drawTerrainData();
+
 	}
 }
 
@@ -290,7 +368,29 @@ void ExampleAIModule::onUnitCreate(BWAPI::Unit unit)
 		Broodwar->sendText("A %s [%x] has been created at (%d,%d)", unit->getType().getName().c_str(), unit, unit->getPosition().x, unit->getPosition().y);
 	}
 
-	
+	for (auto unit : Broodwar->self()->getUnits())
+	{
+		if (unit->isIdle())
+		{
+			if (unit->getType().isWorker())
+			{
+				Unit closestMineral = NULL;
+				for (auto m : Broodwar->getMinerals())
+				{
+					if (closestMineral == NULL || unit->getDistance(m) < unit->getDistance(closestMineral))
+					{
+						closestMineral = m;
+					}
+				}
+				if (closestMineral != NULL)
+				{
+					unit->rightClick(closestMineral);
+					//Broodwar->printf("Send worker %d to mineral %d", unit->getID(), closestMineral->getID());
+					break;
+				}
+			}
+		}
+	}
 }
 
 //Called when a unit has been destroyed.

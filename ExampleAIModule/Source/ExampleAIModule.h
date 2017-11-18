@@ -48,9 +48,10 @@ public:
 	//SENDING ALL THE JIMs TO THE FIELDS
 	void sendWorkersToMinirals();
 
+	void buildCommandCenter();
+
 private:
 	int amountOfWorkes;
-
 	StrategyBuild strategyBuild;
 	
 	StrategyTrain strategyTrain;
