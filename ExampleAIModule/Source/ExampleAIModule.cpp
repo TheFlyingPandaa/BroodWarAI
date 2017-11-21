@@ -368,6 +368,18 @@ void ExampleAIModule::onUnitCreate(BWAPI::Unit unit)
 		Broodwar->sendText("A %s [%x] has been created at (%d,%d)", unit->getType().getName().c_str(), unit, unit->getPosition().x, unit->getPosition().y);
 	}
 
+	for (auto u : Broodwar->self()->getUnits())
+	{
+		//Check if unit is a Marine
+		if (u->getType() == UnitTypes::Enum::Terran_Marine)
+		{
+			//Find guard point
+			Position guardPoint = findGuardPoint();
+			//Order the worker to move to the guard point
+			u->rightClick(guardPoint);
+		}
+	}
+
 	for (auto unit : Broodwar->self()->getUnits())
 	{
 		if (unit->isIdle())
