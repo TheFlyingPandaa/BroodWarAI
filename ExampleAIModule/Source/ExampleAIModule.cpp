@@ -6,6 +6,8 @@ bool analysis_just_finished;
 BWTA::Region* home;
 BWTA::Region* enemy_base;
 
+BWAPI::UnitType builderUnit;
+
 
 //This is the startup method. It is called once
 //when a new game has been started with the bot.
@@ -14,6 +16,10 @@ void ExampleAIModule::onStart()
 
 	strategyBuild = StrategyBuild();
 	strategyTrain = StrategyTrain();
+
+
+	Broodwar->setLocalSpeed(1);
+	
 
 	Broodwar->sendText("Hello world!");
 	//Enable flags
@@ -32,6 +38,19 @@ void ExampleAIModule::onStart()
 
 	//Send each worker to the mineral field that is closest to it
 	sendWorkersToMinirals();
+
+	for (auto builder : Broodwar->self()->getUnits())
+	{
+		if (builder->getType().isWorker())
+		{
+			builderUnit = builder->getType();
+
+			//Position chock = findGuardPoint();
+
+			//builder->rightClick(chock);
+			break;
+		}
+	}
 }
 
 //Called when a game is ended.
@@ -72,7 +91,7 @@ void ExampleAIModule::sendWorkersToMinirals()
 {
 	for (auto u : Broodwar->self()->getUnits())
 	{
-		if (u->getType().isWorker())
+		if (u->getType().isWorker()) //&& u->getType() != builderUnit)
 		{
 			Unit closestMineral = NULL;
 			for (auto m : Broodwar->getMinerals())
@@ -159,6 +178,7 @@ void ExampleAIModule::buildCommandCenter()
 //shall be called.
 void ExampleAIModule::onFrame()
 {
+
 	
 	//buildCommandCenter();
 	//Call every 100:th frame
@@ -384,7 +404,7 @@ void ExampleAIModule::onUnitCreate(BWAPI::Unit unit)
 	{
 		if (unit->isIdle())
 		{
-			if (unit->getType().isWorker())
+			if (unit->getType().isWorker()) //&& unit->getType() != builderUnit)
 			{
 				Unit closestMineral = NULL;
 				for (auto m : Broodwar->getMinerals())
@@ -567,7 +587,7 @@ void ExampleAIModule::onUnitComplete(BWAPI::Unit unit)
 	{
 		if (unit->isIdle())
 		{
-			if (unit->getType().isWorker())
+			if (unit->getType().isWorker())// && unit->getType() != builderUnit)
 			{
 				Unit closestMineral = NULL;
 				for (auto m : Broodwar->getMinerals())
