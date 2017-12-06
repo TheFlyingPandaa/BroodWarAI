@@ -6,7 +6,13 @@ bool analysis_just_finished;
 BWTA::Region* home;
 BWTA::Region* enemy_base;
 
-BWAPI::UnitType builderUnit;
+BWAPI::Unit builderUnit;
+
+TilePosition tempDraw;
+UnitType tempUnit;
+bool willDraw = false;
+bool done = false;
+int tempInt = 0;
 
 
 //This is the startup method. It is called once
@@ -18,7 +24,7 @@ void ExampleAIModule::onStart()
 	strategyTrain = StrategyTrain();
 
 
-	Broodwar->setLocalSpeed(1);
+	Broodwar->setLocalSpeed(0);
 	
 
 	Broodwar->sendText("Hello world!");
@@ -43,7 +49,7 @@ void ExampleAIModule::onStart()
 	{
 		if (builder->getType().isWorker())
 		{
-			builderUnit = builder->getType();
+			//builderUnit = builder->getType();
 
 			//Position chock = findGuardPoint();
 
@@ -150,22 +156,24 @@ void ExampleAIModule::buildCommandCenter()
 		{
 			UnitType type = BWAPI::UnitTypes::Enum::Terran_Command_Center;
 			//TilePosition buildPos = Broodwar->getBuildLocation(type , cPos, 63, false);
-			for (size_t i = 0; i < 10; i++)
-			{
+			//for (size_t i = 0; i < 10; i++)
+			//{
 				JIM->build(type, cPos);
-			}
+			//}
 			Broodwar->drawBox(CoordinateType::Map, cPos.x * 32, cPos.y * 32, cPos.x * 32 + 4 * 32, cPos.y * 32 + 3 * 32, Colors::Red, false);
 
+			builderUnit = JIM;
+
+			tempUnit = type;
+			tempDraw = cPos;
+			willDraw = true;
 
 			Broodwar->printf("Build stage %d", strategyBuild.getBuildStage());
 
-
+			JIM->build(type, cPos);
 			strategyBuild.buildingBuilt();
 			//W
-			if (JIM->getRemainingBuildTime() <= 0)
-			{
-				JIM->build(type, cPos);
-			}
+			
 			break;
 		}
 	}
@@ -256,7 +264,7 @@ void ExampleAIModule::onFrame()
 		
 		}*/
 
-		if (Broodwar->self()->minerals() >= strategyBuild.getMiniralGoal())
+		if (Broodwar->self()->minerals() >= strategyBuild.getMiniralGoal() && willDraw == false && done == false)
 		{
 			UnitType type = strategyBuild.getCurrentBuild();
 			TilePosition destPos;
@@ -272,22 +280,27 @@ void ExampleAIModule::onFrame()
 
 						destPos = JIM->getTilePosition();
 						TilePosition buildPos = Broodwar->getBuildLocation(type, destPos, 63, false);
-						for (size_t i = 0; i < 10; i++)
-						{
-							JIM->build(type, buildPos);
-						}
+						//for (size_t i = 0; i < 10; i++)
+						//{
+						//	JIM->build(type, buildPos);
+						//}
 						Broodwar->drawBox(CoordinateType::Map, buildPos.x * 32, buildPos.y * 32, buildPos.x * 32 + 4 * 32, buildPos.y * 32 + 3 * 32, Colors::Red, false);
 
 
 						Broodwar->printf("Build stage %d", strategyBuild.getBuildStage());
 
+						builderUnit = JIM;
+						tempUnit = strategyBuild.getCurrentBuild();
+
+						tempDraw = buildPos;
+						willDraw = true;
 
 						strategyBuild.buildingBuilt();
 						//W
-						if (JIM->getRemainingBuildTime() <= 0)
-						{
-							JIM->build(type, buildPos);
-						}
+						//if (JIM->getRemainingBuildTime() <= 0)
+						//{
+						//	JIM->build(type, buildPos);
+						//}
 						break;
 					}
 				}
@@ -302,6 +315,33 @@ void ExampleAIModule::onFrame()
 	if (analyzed)
 	{
 		drawTerrainData();
+
+		if (willDraw)
+		{
+			if (done == false)
+			{
+				builderUnit->move(Position(tempDraw.x * 32, tempDraw.y * 32));
+				if (builderUnit->getTilePosition().getDistance(tempDraw) < 10)
+				{
+					done = true;
+				}
+				
+			}
+			if (done)
+			{
+				builderUnit->build(tempUnit, tempDraw);
+				tempInt++;
+				Broodwar->printf("%d", tempInt);
+				if (tempInt >= 200)
+				{
+					done = false;
+					willDraw = false;
+					tempInt = 0;
+				}
+			}
+			
+			Broodwar->drawBox(CoordinateType::Map, tempDraw.x * 32, tempDraw.y * 32, tempDraw.x * 32 + 4 * 32, tempDraw.y * 32 + 3 * 32, Colors::Red, false);
+		}
 
 	}
 }
@@ -511,7 +551,7 @@ void ExampleAIModule::drawTerrainData()
 		TilePosition p = bl->getTilePosition();
 		Position c = bl->getPosition();
 		//Draw outline of center location
-		Broodwar->drawBox(CoordinateType::Map, p.x * 32, p.y * 32, p.x * 32 + 4 * 32, p.y * 32 + 3 * 32, Colors::Blue, false);
+		//Broodwar->drawBox(CoordinateType::Map, p.x * 32, p.y * 32, p.x * 32 + 4 * 32, p.y * 32 + 3 * 32, Colors::Blue, false);
 		//Draw a circle at each mineral patch
 		for (auto m : bl->getStaticMinerals())
 		{
