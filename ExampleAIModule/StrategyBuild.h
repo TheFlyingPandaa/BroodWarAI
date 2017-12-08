@@ -4,6 +4,8 @@
 #define INT_MAX 2147483647
 #include <BWAPI/UnitType.h>
 
+const int buildings = 6;
+
 class StrategyBuild
 {
 public:
@@ -15,18 +17,21 @@ public:
 
 	int getBuildStage();
 	bool getIsCommandCenter();
+	bool getIsRefinary() const;
 
 
 	void buildingBuilt();
 private:
 
 	//Pallar inte göra en Glass för detta
-	BWAPI::UnitType buildOrder[3];
-	int miniralGoal[4];
+	BWAPI::UnitType buildOrder[buildings];
+	int miniralGoal[buildings];
 
 	int buildStage;
 
 	bool isCommandCenter;
+
+	bool isRefinary;
 	//int miniralGoal;
 
 };

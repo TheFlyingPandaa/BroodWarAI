@@ -14,6 +14,11 @@ bool willDraw = false;
 bool done = false;
 int tempInt = 0;
 
+bool building = NULL;
+
+const double maxDistanceFormBase = 1024;
+Position mainBase;
+
 
 //This is the startup method. It is called once
 //when a new game has been started with the bot.
@@ -44,6 +49,8 @@ void ExampleAIModule::onStart()
 
 	//Send each worker to the mineral field that is closest to it
 	sendWorkersToMinirals();
+
+	mainBase = Broodwar->self()->getUnits().getPosition();
 
 	for (auto builder : Broodwar->self()->getUnits())
 	{
@@ -155,25 +162,17 @@ void ExampleAIModule::buildCommandCenter()
 		if (JIM->getType().isWorker() && JIM->isGatheringMinerals() || JIM->isIdle())
 		{
 			UnitType type = BWAPI::UnitTypes::Enum::Terran_Command_Center;
-			//TilePosition buildPos = Broodwar->getBuildLocation(type , cPos, 63, false);
-			//for (size_t i = 0; i < 10; i++)
-			//{
-				JIM->build(type, cPos);
-			//}
+
 			Broodwar->drawBox(CoordinateType::Map, cPos.x * 32, cPos.y * 32, cPos.x * 32 + 4 * 32, cPos.y * 32 + 3 * 32, Colors::Red, false);
 
 			builderUnit = JIM;
 
 			tempUnit = type;
 			tempDraw = cPos;
-			willDraw = true;
+			building = true;
 
 			Broodwar->printf("Build stage %d", strategyBuild.getBuildStage());
-
-			JIM->build(type, cPos);
-			strategyBuild.buildingBuilt();
-			//W
-			
+						
 			break;
 		}
 	}
@@ -190,10 +189,14 @@ void ExampleAIModule::onFrame()
 	
 	//buildCommandCenter();
 	//Call every 100:th frame
+
+	//draws the main base position (ish)
+	Broodwar->drawCircle(CoordinateType::Map, mainBase.x, mainBase.y, 10, Colors::Green, true);
+
 	if (Broodwar->getFrameCount() % 100 == 0)
 	{
 		
-		Broodwar->printf("miniral amout %d", Broodwar->self()->minerals());
+		//Broodwar->printf("miniral amout %d", Broodwar->self()->minerals());
 		
 
 		/*
@@ -213,8 +216,9 @@ void ExampleAIModule::onFrame()
 			}
 		}
 		*/
-		if (Broodwar->self()->minerals() >= strategyTrain.getUnitCostGoal())
-		{
+		/*
+		if (Broodwar->self()->minerals() >= strategyTrain.getUnitCostGoal() && strategyTrain.getTrainOrder() == -1)
+		{ 
 			for (auto building : Broodwar->self()->getUnits())
 			{
 				//WHY BE LIKE THE REST. NAHH PUT 0 AS FINNISHED EVER HEARD OF -1
@@ -223,10 +227,8 @@ void ExampleAIModule::onFrame()
 					UnitType::list queueCheck = building->getTrainingQueue();
 
 					if (queueCheck.size() <= 4)
-					{
-
-						building->train(strategyTrain.getUnitOrder());
-						//building->train(strategyTrain.getUnitOrder());
+					{						
+						building->train(strategyTrain.getUnitOrder());						
 						strategyTrain.trainedUnit();
 						Broodwar->printf("Amount Of units left %d", strategyTrain.getAmountOfUnits());
 						Broodwar->printf("current Stage %d", strategyTrain.getTrainOrder());
@@ -243,7 +245,7 @@ void ExampleAIModule::onFrame()
 
 			}
 		}
-
+		*/
 		
 		/*if (Broodwar->self()->minerals() >= 100)
 		{
@@ -264,8 +266,9 @@ void ExampleAIModule::onFrame()
 		
 		}*/
 
-		if (Broodwar->self()->minerals() >= strategyBuild.getMiniralGoal() && willDraw == false && done == false)
+		if (Broodwar->self()->minerals() >= strategyBuild.getMiniralGoal() && strategyBuild.getMiniralGoal() != -1 /*&& willDraw == false && done == false*/ && (!building || building == NULL))
 		{
+			
 			UnitType type = strategyBuild.getCurrentBuild();
 			TilePosition destPos;
 			if (strategyBuild.getIsCommandCenter())
@@ -273,77 +276,87 @@ void ExampleAIModule::onFrame()
 				buildCommandCenter();
 			}
 			else {
-				for (auto JIM : Broodwar->self()->getUnits())
+				Unit JIM = NULL;
+				for (auto unit : Broodwar->self()->getUnits())
 				{
-					if (JIM->getType().isWorker() && JIM->isGatheringMinerals() || JIM->isIdle())
-					{
-
-						destPos = JIM->getTilePosition();
-						TilePosition buildPos = Broodwar->getBuildLocation(type, destPos, 63, false);
-						//for (size_t i = 0; i < 10; i++)
-						//{
-						//	JIM->build(type, buildPos);
-						//}
-						Broodwar->drawBox(CoordinateType::Map, buildPos.x * 32, buildPos.y * 32, buildPos.x * 32 + 4 * 32, buildPos.y * 32 + 3 * 32, Colors::Red, false);
-
-
-						Broodwar->printf("Build stage %d", strategyBuild.getBuildStage());
-
-						builderUnit = JIM;
-						tempUnit = strategyBuild.getCurrentBuild();
-
-						tempDraw = buildPos;
-						willDraw = true;
-
-						strategyBuild.buildingBuilt();
-						//W
-						//if (JIM->getRemainingBuildTime() <= 0)
-						//{
-						//	JIM->build(type, buildPos);
-						//}
-						break;
-					}
+					if (unit->getType().isWorker())
+						JIM = unit;
+					if (unit->getType().isWorker() && unit->getPosition().getDistance(mainBase) < JIM->getPosition().getDistance(mainBase) && (unit->isGatheringMinerals() || unit->isIdle()))
+						JIM = unit;
 				}
+				destPos = JIM->getTilePosition();
+				TilePosition buildPos = Broodwar->getBuildLocation(type, destPos, 63, false);
+
+				Broodwar->drawBox(CoordinateType::Map, buildPos.x * 32, buildPos.y * 32, buildPos.x * 32 + 4 * 32, buildPos.y * 32 + 3 * 32, Colors::Red, false);
+
+				Broodwar->printf("Build stage %d", strategyBuild.getBuildStage());
+
+				builderUnit = JIM;
+				tempUnit = strategyBuild.getCurrentBuild();
+
+				tempDraw = buildPos;
+				//willDraw = true;
+
+				building = true;
 			}
 		}
-		
-	}
-	
-	
 
-	//Draw lines around regions, chokepoints etc.
-	if (analyzed)
+	}
+	if (building){
+		if (buildBuilding(builderUnit, tempUnit, tempDraw)){
+			strategyBuild.buildingBuilt();
+			building = false;
+
+			this->sendWorkerToMinirals(builderUnit);
+		}
+	}
+
+}
+
+bool ExampleAIModule::buildBuilding(Unit worker, UnitType building, TilePosition position){
+
+	bool dest = false;
+	drawTerrainData();
+	Broodwar->drawBox(CoordinateType::Map, position.x * 32, position.y * 32, position.x * 32 + 4 * 32, position.y * 32 + 3 * 32, Colors::Red, false);
+	
+	if (!dest)
 	{
-		drawTerrainData();
-
-		if (willDraw)
-		{
-			if (done == false)
-			{
-				builderUnit->move(Position(tempDraw.x * 32, tempDraw.y * 32));
-				if (builderUnit->getTilePosition().getDistance(tempDraw) < 10)
-				{
-					done = true;
-				}
-				
-			}
-			if (done)
-			{
-				builderUnit->build(tempUnit, tempDraw);
-				tempInt++;
-				Broodwar->printf("%d", tempInt);
-				if (tempInt >= 200)
-				{
-					done = false;
-					willDraw = false;
-					tempInt = 0;
-				}
-			}
-			
-			Broodwar->drawBox(CoordinateType::Map, tempDraw.x * 32, tempDraw.y * 32, tempDraw.x * 32 + 4 * 32, tempDraw.y * 32 + 3 * 32, Colors::Red, false);
+		if (worker->getTilePosition().getDistance(position) < 10)		
+			dest = true;
+		if (!dest){
+			worker->move(Position(position.x * 32, position.y * 32));
+			return false;
 		}
-
 	}
+
+	if (dest)
+	{	
+		if (worker->build(building, position))						
+			return false;
+		if (worker->isIdle())
+			return true;	
+	}	
+	return false;
+	
+}
+
+void ExampleAIModule::sendWorkerToMinirals(Unit worker){
+	Unit closestMineral = NULL;
+	for (auto m : Broodwar->getMinerals())
+	{
+		if (closestMineral == NULL || builderUnit->getDistance(m) < builderUnit->getDistance(closestMineral))
+		{
+			closestMineral = m;
+		}
+	}
+	if (closestMineral != NULL)
+	{
+		worker->rightClick(closestMineral);
+	}
+}
+
+void ExampleAIModule::sendWorkerToTheRefinery(Unit worker, Unit refinery){
+	worker->rightClick(refinery);
 }
 
 //Is called when text is written in the console window.

@@ -5,7 +5,7 @@ StrategyTrain::StrategyTrain()
 	this->trainOrder = 0;
 
 	unitBuildning[0] = BWAPI::UnitTypes::Enum::Terran_Command_Center;
-	unitBuildning[1] = BWAPI::UnitTypes::Enum::Terran_Barracks;
+	unitBuildning[1] = BWAPI::UnitTypes::Enum::Terran_Barracks;	
 
 	unitOrder[0] = BWAPI::UnitTypes::Enum::Terran_SCV;
 	unitOrder[1] = BWAPI::UnitTypes::Enum::Terran_Marine;
@@ -36,7 +36,10 @@ void StrategyTrain::trainedUnit()
 
 int StrategyTrain::getTrainOrder()
 {
-	return trainOrder;
+	if (this->trainOrder < amount)
+		return trainOrder;
+	else
+		return -1;
 }
 
 

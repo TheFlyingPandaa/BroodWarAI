@@ -45,6 +45,11 @@ public:
 	void showForces();
 	Position findGuardPoint();
 
+	bool buildBuilding(Unit worker, UnitType building, TilePosition position);
+
+	void sendWorkerToTheRefinery(Unit worker, Unit refinery);
+	void sendWorkerToMinirals(Unit worker);
+
 	//SENDING ALL THE JIMs TO THE FIELDS
 	void sendWorkersToMinirals();
 
