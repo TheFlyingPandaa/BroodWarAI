@@ -216,11 +216,12 @@ void ExampleAIModule::onFrame()
 			}
 		}
 		*/
-		/*
-		if (Broodwar->self()->minerals() >= strategyTrain.getUnitCostGoal() && strategyTrain.getTrainOrder() == -1)
+		
+		if (Broodwar->self()->minerals() >= strategyTrain.getUnitCostGoal() && strategyTrain.getTrainOrder() != -1)
 		{ 
 			for (auto building : Broodwar->self()->getUnits())
 			{
+				
 				//WHY BE LIKE THE REST. NAHH PUT 0 AS FINNISHED EVER HEARD OF -1
 				if (building->getType() == strategyTrain.getUnitBuildning() && building->getRemainingBuildTime() < 1)
 				{
@@ -245,7 +246,7 @@ void ExampleAIModule::onFrame()
 
 			}
 		}
-		*/
+		
 		
 		/*if (Broodwar->self()->minerals() >= 100)
 		{
