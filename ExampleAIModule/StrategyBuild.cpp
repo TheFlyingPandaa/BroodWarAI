@@ -28,6 +28,9 @@ StrategyBuild::StrategyBuild()
 	this->gasGoal[5] = -1;
 	this->gasGoal[6] = 100;
 
+	for (int i = 0; i < buildings; i++)
+		this->uBuild[i] = NULL;
+
 	this->isCommandCenter = false;
 	this->isRefinary = false;
 }
@@ -35,6 +38,20 @@ StrategyBuild::StrategyBuild()
 StrategyBuild::~StrategyBuild()
 {
 	
+}
+
+bool StrategyBuild::exists(BWAPI::Unit u) const{
+	
+	for (int i = 0; i < buildings; i++){
+		if (this->uBuild[i] == u)
+			return true;
+	}
+	return false;
+}
+
+void StrategyBuild::add(BWAPI::Unit u){
+
+	this->uBuild[buildStage] = u;
 }
 
 bool StrategyBuild::getIsCommandCenter()

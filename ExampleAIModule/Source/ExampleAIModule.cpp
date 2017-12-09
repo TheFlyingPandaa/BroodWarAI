@@ -29,16 +29,15 @@ void ExampleAIModule::onStart()
 	strategyTrain = StrategyTrain();
 
 
-	Broodwar->setLocalSpeed(0);
-
-	
-	
+	Broodwar->setLocalSpeed(0);	
 
 	Broodwar->sendText("Hello world!");
 	//Enable flags
 	Broodwar->enableFlag(Flag::UserInput);
 	//Uncomment to enable complete map information
 	//Broodwar->enableFlag(Flag::CompleteMapInformation);
+	
+	
 	
 	this->amountOfWorkes = 5;
 
@@ -47,25 +46,13 @@ void ExampleAIModule::onStart()
 	analyzed = false;
 	analysis_just_finished = false;
 	//CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)AnalyzeThread, NULL, 0, NULL); //Threaded version
+	
 	AnalyzeThread();
 
 	//Send each worker to the mineral field that is closest to it
 	sendWorkersToMinirals();
 
 	mainBase = Broodwar->self()->getUnits().getPosition();
-
-	for (auto builder : Broodwar->self()->getUnits())
-	{
-		if (builder->getType().isWorker())
-		{
-			//builderUnit = builder->getType();
-
-			//Position chock = findGuardPoint();
-
-			//builder->rightClick(chock);
-			break;
-		}
-	}
 }
 
 //Called when a game is ended.
@@ -194,11 +181,11 @@ void ExampleAIModule::onFrame()
 
 	//draws the main base position (ish)
 	Broodwar->drawCircle(CoordinateType::Map, mainBase.x, mainBase.y, 10, Colors::Green, true);
-
+	drawTerrainData();
 	if (Broodwar->getFrameCount() % 100 == 0)
 	{
-	
-		/*
+		
+		
 		if (Broodwar->self()->minerals() >= strategyTrain.getUnitCostGoal() &&
 			Broodwar->self()->gas() >= strategyTrain.getGasGoal() &&
 			strategyTrain.getTrainOrder() != -1)
@@ -230,7 +217,7 @@ void ExampleAIModule::onFrame()
 
 			}
 		}
-		*/
+		
 	
 
 		if (Broodwar->self()->minerals() >= strategyBuild.getMiniralGoal() &&
@@ -275,11 +262,22 @@ void ExampleAIModule::onFrame()
 	if (building){
 		if (buildBuilding(builderUnit, tempUnit, tempDraw)){
 			building = false;
+
+			Broodwar->printf("Build stage %i Complete", strategyBuild.getBuildStage());
+
 			if (strategyBuild.getIsRefinary())
 				this->sendWorkerToTheRefinery(builderUnit);
 			else
 				this->sendWorkerToMinirals(builderUnit);
-			strategyBuild.buildingBuilt();
+			for (auto b : Broodwar->self()->getUnits()){
+				if (b->getType() == strategyBuild.getCurrentBuild()){
+					if (!strategyBuild.exists(b)){
+						strategyBuild.add(b);
+						strategyBuild.buildingBuilt();
+					}
+				}
+			}
+			//strategyBuild.buildingBuilt();
 		}
 	}
 
@@ -288,7 +286,7 @@ void ExampleAIModule::onFrame()
 bool ExampleAIModule::buildBuilding(Unit worker, UnitType building, TilePosition position){
 
 	bool dest = false;
-	drawTerrainData();
+	
 	Broodwar->drawBox(CoordinateType::Map, position.x * 32, position.y * 32, position.x * 32 + 4 * 32, position.y * 32 + 3 * 32, Colors::Red, false);
 	
 	if (!dest)
@@ -305,7 +303,7 @@ bool ExampleAIModule::buildBuilding(Unit worker, UnitType building, TilePosition
 	{	
 		if (worker->build(building, position))						
 			return false;
-		if (worker->isIdle() || worker->isGatheringGas())
+		if (worker->isIdle() || worker->isGatheringGas() || worker == NULL)
 			return true;	
 	}	
 	return false;
