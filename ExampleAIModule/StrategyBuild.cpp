@@ -74,11 +74,11 @@ void StrategyBuild::buildingBuilt()
 	isCommandCenter = false;
 	isRefinary = false;
 
-	if (buildStage == 3)
+	if (buildOrder[buildStage] == BWAPI::UnitTypes::Enum::Terran_Command_Center)
 	{
 		isCommandCenter = true;
 	}
-	if (buildStage == 5)
+	if (buildOrder[buildStage] == BWAPI::UnitTypes::Enum::Terran_Refinery)
 		this->isRefinary = true;
 
 }
