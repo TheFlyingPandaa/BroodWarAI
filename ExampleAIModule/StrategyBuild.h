@@ -4,7 +4,7 @@
 #define INT_MAX 2147483647
 #include <BWAPI/UnitType.h>
 
-const int buildings = 6;
+const int buildings = 7;
 
 class StrategyBuild
 {
@@ -14,6 +14,7 @@ public:
 
 	BWAPI::UnitType getCurrentBuild();
 	int getMiniralGoal();
+	int getGasGoal();
 
 	int getBuildStage();
 	bool getIsCommandCenter();
@@ -26,6 +27,7 @@ private:
 	//Pallar inte göra en Glass för detta
 	BWAPI::UnitType buildOrder[buildings];
 	int miniralGoal[buildings];
+	int gasGoal[buildings];
 
 	int buildStage;
 

@@ -30,6 +30,8 @@ void ExampleAIModule::onStart()
 
 
 	Broodwar->setLocalSpeed(0);
+
+	
 	
 
 	Broodwar->sendText("Hello world!");
@@ -159,7 +161,7 @@ void ExampleAIModule::buildCommandCenter()
 
 	for (auto JIM : Broodwar->self()->getUnits() )
 	{
-		if (JIM->getType().isWorker() && JIM->isGatheringMinerals() || JIM->isIdle())
+		if (JIM->getType().isWorker() && (JIM->isGatheringMinerals() || JIM->isIdle()))
 		{
 			UnitType type = BWAPI::UnitTypes::Enum::Terran_Command_Center;
 
@@ -195,29 +197,11 @@ void ExampleAIModule::onFrame()
 
 	if (Broodwar->getFrameCount() % 100 == 0)
 	{
-		
-		//Broodwar->printf("miniral amout %d", Broodwar->self()->minerals());
-		
-
+	
 		/*
-		//Order one of our workers to guard our chokepoint.
-		//Iterate through the list of units.
-		for (auto u : Broodwar->self()->getUnits())
-		{
-			//Check if unit is a worker.
-			if (u->getType().isWorker())
-			{
-				//Find guard point
-				Position guardPoint = findGuardPoint();
-				//Order the worker to move to the guard point
-				u->rightClick(guardPoint);
-				//Only send the first worker.
-				break;
-			}
-		}
-		*/
-		
-		if (Broodwar->self()->minerals() >= strategyTrain.getUnitCostGoal() && strategyTrain.getTrainOrder() != -1)
+		if (Broodwar->self()->minerals() >= strategyTrain.getUnitCostGoal() &&
+			Broodwar->self()->gas() >= strategyTrain.getGasGoal() &&
+			strategyTrain.getTrainOrder() != -1)
 		{ 
 			for (auto building : Broodwar->self()->getUnits())
 			{
@@ -246,28 +230,13 @@ void ExampleAIModule::onFrame()
 
 			}
 		}
-		
-		
-		/*if (Broodwar->self()->minerals() >= 100)
-		{
-			UnitType type = UnitTypes::Enum::Terran_Supply_Depot;
-			TilePosition destPos;
-			
-			for (auto JIM : Broodwar->self()->getUnits())
-			{
-				if (JIM->getType().isWorker())
-				{
-					destPos = JIM->getTilePosition();
-					TilePosition buildPos = Broodwar->getBuildLocation(type, destPos, 63, false);
-					Broodwar->drawBox(CoordinateType::Map, buildPos.x * 32, buildPos.y * 32, buildPos.x * 32 + 4 * 32, buildPos.y * 32 + 3 * 32, Colors::Red, false);
-					JIM->build(type, buildPos);
-					break;
-				}
-			}
-		
-		}*/
+		*/
+	
 
-		if (Broodwar->self()->minerals() >= strategyBuild.getMiniralGoal() && strategyBuild.getMiniralGoal() != -1 /*&& willDraw == false && done == false*/ && (!building || building == NULL))
+		if (Broodwar->self()->minerals() >= strategyBuild.getMiniralGoal() &&
+			strategyBuild.getMiniralGoal() != -1 && 
+			Broodwar->self()->gas() >= strategyBuild.getGasGoal() &&
+			(!building || building == NULL))
 		{
 			
 			UnitType type = strategyBuild.getCurrentBuild();
@@ -305,10 +274,12 @@ void ExampleAIModule::onFrame()
 	}
 	if (building){
 		if (buildBuilding(builderUnit, tempUnit, tempDraw)){
-			strategyBuild.buildingBuilt();
 			building = false;
-
-			this->sendWorkerToMinirals(builderUnit);
+			if (strategyBuild.getIsRefinary())
+				this->sendWorkerToTheRefinery(builderUnit);
+			else
+				this->sendWorkerToMinirals(builderUnit);
+			strategyBuild.buildingBuilt();
 		}
 	}
 
@@ -334,7 +305,7 @@ bool ExampleAIModule::buildBuilding(Unit worker, UnitType building, TilePosition
 	{	
 		if (worker->build(building, position))						
 			return false;
-		if (worker->isIdle())
+		if (worker->isIdle() || worker->isGatheringGas())
 			return true;	
 	}	
 	return false;
@@ -356,8 +327,15 @@ void ExampleAIModule::sendWorkerToMinirals(Unit worker){
 	}
 }
 
-void ExampleAIModule::sendWorkerToTheRefinery(Unit worker, Unit refinery){
-	worker->rightClick(refinery);
+void ExampleAIModule::sendWorkerToTheRefinery(Unit worker){
+	Unit ref = NULL;
+	for (auto b : Broodwar->self()->getUnits())
+	{
+		if (b->getType() == UnitTypes::Enum::Terran_Refinery)
+			if (ref == NULL || (b->getPosition().getDistance(worker->getPosition()) < ref->getPosition().getDistance(worker->getPosition())))
+				ref = b;
+	}
+	worker->rightClick(ref);
 }
 
 //Is called when text is written in the console window.

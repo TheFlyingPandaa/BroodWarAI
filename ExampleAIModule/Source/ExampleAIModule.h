@@ -47,7 +47,7 @@ public:
 
 	bool buildBuilding(Unit worker, UnitType building, TilePosition position);
 
-	void sendWorkerToTheRefinery(Unit worker, Unit refinery);
+	void sendWorkerToTheRefinery(Unit worker);
 	void sendWorkerToMinirals(Unit worker);
 
 	//SENDING ALL THE JIMs TO THE FIELDS
