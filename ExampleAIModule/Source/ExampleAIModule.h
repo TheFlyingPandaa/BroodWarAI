@@ -6,6 +6,7 @@
 //#include "StrategyBuild.h"
 #include "../StrategyBuild.h"
 #include "../StrategyTrain.h"
+#include "../ManageUnits.h"
 
 extern bool analyzed;
 extern bool analysis_just_finished;

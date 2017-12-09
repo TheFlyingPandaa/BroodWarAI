@@ -3,7 +3,7 @@
 #include <BWAPI/UnitType.h>
 
 
-const int amount = 3;
+const int amount = 4;
 
 class StrategyTrain
 {

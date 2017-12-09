@@ -7,22 +7,27 @@ StrategyTrain::StrategyTrain()
 	unitBuildning[0] = BWAPI::UnitTypes::Enum::Terran_Command_Center;
 	unitBuildning[1] = BWAPI::UnitTypes::Enum::Terran_Barracks;	
 	unitBuildning[2] = BWAPI::UnitTypes::Enum::Terran_Barracks;
+	unitBuildning[3] = BWAPI::UnitTypes::Enum::Terran_Command_Center;
 
 	unitOrder[0] = BWAPI::UnitTypes::Enum::Terran_SCV;
 	unitOrder[1] = BWAPI::UnitTypes::Enum::Terran_Marine;
 	unitOrder[2] = BWAPI::UnitTypes::Enum::Terran_Medic;
+	unitOrder[3] = BWAPI::UnitTypes::Enum::Terran_SCV;
 
 	unitCostGoal[0] = 50;
 	unitCostGoal[1] = 50;
 	unitCostGoal[2] = 50;
+	unitCostGoal[3] = 50;
 
 	amountOfUnits[0] = 3;
 	amountOfUnits[1] = 10;
 	amountOfUnits[2] = 3;
+	amountOfUnits[3] = 5;
 
 	unitGasGoal[0] = -1;
 	unitGasGoal[1] = -1;
 	unitGasGoal[2] = 25;
+	unitGasGoal[3] = -1;
 }
 
 StrategyTrain::~StrategyTrain()

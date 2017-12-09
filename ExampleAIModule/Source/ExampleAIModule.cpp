@@ -27,6 +27,7 @@ void ExampleAIModule::onStart()
 
 	strategyBuild = StrategyBuild();
 	strategyTrain = StrategyTrain();
+	
 
 
 	Broodwar->setLocalSpeed(0);	
@@ -182,44 +183,43 @@ void ExampleAIModule::onFrame()
 	//draws the main base position (ish)
 	Broodwar->drawCircle(CoordinateType::Map, mainBase.x, mainBase.y, 10, Colors::Green, true);
 	drawTerrainData();
+
+
+
 	if (Broodwar->getFrameCount() % 100 == 0)
 	{
 		
-		
+		//_____________________________________________________________________________________________________________
 		if (Broodwar->self()->minerals() >= strategyTrain.getUnitCostGoal() &&
 			Broodwar->self()->gas() >= strategyTrain.getGasGoal() &&
 			strategyTrain.getTrainOrder() != -1)
 		{ 
-			for (auto building : Broodwar->self()->getUnits())
-			{
-				
+			Unit ubuild = NULL;
+			for (auto b : Broodwar->self()->getUnits())
+			{				
 				//WHY BE LIKE THE REST. NAHH PUT 0 AS FINNISHED EVER HEARD OF -1
-				if (building->getType() == strategyTrain.getUnitBuildning() && building->getRemainingBuildTime() < 1)
-				{
-					UnitType::list queueCheck = building->getTrainingQueue();
-
-					if (queueCheck.size() <= 4)
-					{						
-						building->train(strategyTrain.getUnitOrder());						
-						strategyTrain.trainedUnit();
-						Broodwar->printf("Amount Of units left %d", strategyTrain.getAmountOfUnits());
-						Broodwar->printf("current Stage %d", strategyTrain.getTrainOrder());
-						break;
-					}
-					else
-					{
-						Broodwar->printf("Spagetiooo queue is full");
-
-					}
-					
-
+				if (b->getType() == strategyTrain.getUnitBuildning() &&
+					b->getRemainingBuildTime() < 1) {
+					if (ubuild == NULL)
+						ubuild = b;
+					/*else if (b->getPosition().getDistance(mainBase) < ubuild->getPosition().getDistance(mainBase))
+						ubuild = b;*/
 				}
-
+			}
+			if (ubuild != NULL) {
+				UnitType::list queueCheck = ubuild->getTrainingQueue();
+				if (queueCheck.size() <= 4)
+				{
+					ubuild->train(strategyTrain.getUnitOrder());
+					Broodwar->printf("Amount Of units left %d", strategyTrain.getAmountOfUnits());
+					Broodwar->printf("current Stage %d", strategyTrain.getTrainOrder());
+					strategyTrain.trainedUnit();
+				}
 			}
 		}
 		
 	
-
+		//_____________________________________________________________________________________________________________
 		if (Broodwar->self()->minerals() >= strategyBuild.getMiniralGoal() &&
 			strategyBuild.getMiniralGoal() != -1 && 
 			Broodwar->self()->gas() >= strategyBuild.getGasGoal() &&
@@ -238,7 +238,10 @@ void ExampleAIModule::onFrame()
 				{
 					if (unit->getType().isWorker())
 						JIM = unit;
-					if (unit->getType().isWorker() && unit->getPosition().getDistance(mainBase) < JIM->getPosition().getDistance(mainBase) && (unit->isGatheringMinerals() || unit->isIdle()))
+					if (unit->getType().isWorker() && 
+						unit->getPosition().getDistance(mainBase) < JIM->getPosition().getDistance(mainBase) &&
+						(unit->isGatheringMinerals() || unit->isIdle()) &&
+						!unit->isGatheringGas())
 						JIM = unit;
 				}
 				destPos = JIM->getTilePosition();
@@ -257,23 +260,49 @@ void ExampleAIModule::onFrame()
 				building = true;
 			}
 		}
-
+		//Fucking katter går på skrivbordet and shit
+		//oiiiijvgf vfvfgw32w23 Death to all humans aa3sd6hgfnvbm  fghoiifgh
+		int refWorkers = 0;
+		for (Unit ref : Broodwar->self()->getUnits()) {
+			if (ref->getType() == UnitTypes::Enum::Terran_Refinery) {
+				//____________________________________________________________
+				for (Unit w : Broodwar->self()->getUnits()) {
+					if (w->getType().isWorker() && w->isGatheringGas()) {
+						refWorkers++;
+						if (refWorkers >= 2)
+							break;
+					}
+				}
+				//____________________________________________________________
+				if (refWorkers < 2) {
+					for (Unit w : Broodwar->self()->getUnits()) {
+						if (w->getType().isWorker() && !w->isGatheringGas()) {
+							w->rightClick(ref);
+							refWorkers++;
+							if (refWorkers >= 2)
+								break;
+						}
+					}
+				}
+			}
+		}
 	}
 	if (building){
 		if (buildBuilding(builderUnit, tempUnit, tempDraw)){
 			building = false;
 
-			Broodwar->printf("Build stage %i Complete", strategyBuild.getBuildStage());
 
 			if (strategyBuild.getIsRefinary())
 				this->sendWorkerToTheRefinery(builderUnit);
 			else
 				this->sendWorkerToMinirals(builderUnit);
+
 			for (auto b : Broodwar->self()->getUnits()){
 				if (b->getType() == strategyBuild.getCurrentBuild()){
-					if (!strategyBuild.exists(b)){
+					if (!strategyBuild.exists(b) && b->getPosition().getDistance(mainBase) > 64){
 						strategyBuild.add(b);
 						strategyBuild.buildingBuilt();
+						Broodwar->printf("Build stage %i Complete", strategyBuild.getBuildStage());
 					}
 				}
 			}
