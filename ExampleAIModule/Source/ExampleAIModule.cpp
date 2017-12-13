@@ -30,7 +30,7 @@ void ExampleAIModule::onStart()
 	
 
 
-	Broodwar->setLocalSpeed(1);	
+	Broodwar->setLocalSpeed(0);	
 
 	Broodwar->sendText("Hello world!");
 	//Enable flags
@@ -169,6 +169,22 @@ void ExampleAIModule::buildCommandCenter()
 
 }
 
+void ExampleAIModule::buildAddonBuilding()
+{
+	for (auto unit : Broodwar->self()->getUnits())
+	{
+		if (strategyBuild.getBuildStage() == 7)
+		{
+			if (unit->getType() == UnitTypes::Enum::Terran_Factory)
+			{
+				unit->buildAddon(strategyBuild.getCurrentBuild());
+				
+				strategyBuild.buildingBuilt();
+			}
+		}
+	}
+}
+
 
 
 //This is the method called each frame. This is where the bot's logic
@@ -188,7 +204,7 @@ void ExampleAIModule::onFrame()
 
 	if (Broodwar->getFrameCount() % 100 == 0)
 	{
-		
+
 		//_____________________________________________________________________________________________________________
 		if (Broodwar->self()->minerals() >= strategyTrain.getUnitCostGoal() &&
 			Broodwar->self()->gas() >= strategyTrain.getGasGoal() &&
@@ -223,7 +239,8 @@ void ExampleAIModule::onFrame()
 		if (Broodwar->self()->minerals() >= strategyBuild.getMiniralGoal() &&
 			strategyBuild.getMiniralGoal() != -1 && 
 			Broodwar->self()->gas() >= strategyBuild.getGasGoal() &&
-			(!building || building == NULL))
+			(!building || building == NULL) &&
+			strategyBuild.getIsBuildAddon()  != true)
 		{
 			
 			UnitType type = strategyBuild.getCurrentBuild();
@@ -258,6 +275,18 @@ void ExampleAIModule::onFrame()
 				//willDraw = true;
 
 				building = true;
+			}
+		}
+		else
+		{
+			if (Broodwar->self()->minerals() >= strategyBuild.getMiniralGoal() &&
+				strategyBuild.getMiniralGoal() != -1 &&
+				Broodwar->self()->gas() >= strategyBuild.getGasGoal())
+			{
+				if (strategyBuild.getIsBuildAddon())
+				{
+					buildAddonBuilding();
+				}
 			}
 		}
 		//Fucking katter går på skrivbordet and shit

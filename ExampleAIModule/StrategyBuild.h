@@ -5,7 +5,7 @@
 #include <BWAPI/UnitType.h>
 #include <BWAPI.h>
 
-const int buildings = 8;
+const int buildings = 9;
 
 
 
@@ -22,6 +22,7 @@ public:
 	int getBuildStage();
 	bool getIsCommandCenter();
 	bool getIsRefinary() const;
+	bool getIsBuildAddon() const;
 
 
 	void buildingBuilt();
@@ -39,8 +40,8 @@ private:
 	int buildStage;
 
 	bool isCommandCenter;
-
 	bool isRefinary;
+	bool isBuildAddon;
 	//int miniralGoal;
 
 };

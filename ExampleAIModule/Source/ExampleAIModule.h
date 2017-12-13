@@ -56,6 +56,8 @@ public:
 
 	void buildCommandCenter();
 
+	void buildAddonBuilding();
+
 private:
 	int amountOfWorkes;
 	StrategyBuild strategyBuild;

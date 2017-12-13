@@ -11,7 +11,8 @@ StrategyBuild::StrategyBuild()
 	this->buildOrder[4] = BWAPI::UnitTypes::Enum::Terran_Academy;
 	this->buildOrder[5] = BWAPI::UnitTypes::Enum::Terran_Refinery;
 	this->buildOrder[6] = BWAPI::UnitTypes::Enum::Terran_Factory;
-	this->buildOrder[7] = BWAPI::UnitTypes::Enum::Terran_Factory; //Som sagt Ha alltid 1 extra
+	this->buildOrder[7] = BWAPI::UnitTypes::Enum::Terran_Machine_Shop;
+	this->buildOrder[8] = BWAPI::UnitTypes::Enum::Terran_Factory; //Som sagt Ha alltid 1 extra
 
 	this->miniralGoal[0] = 100;	//Supply
 	this->miniralGoal[1] = 100;	//Supply
@@ -20,7 +21,8 @@ StrategyBuild::StrategyBuild()
 	this->miniralGoal[4] = 150; //Academy
 	this->miniralGoal[5] = 100; //Refinary
 	this->miniralGoal[6] = 200; //Factory
-	this->miniralGoal[7] = 20000; //Detta är något lösligt bara så att den inte ska crascha
+	this->miniralGoal[7] = 50; //Factory
+	this->miniralGoal[8] = 20000; //Detta är något lösligt bara så att den inte ska crascha
 
 	this->gasGoal[0] = -1;
 	this->gasGoal[1] = -1;
@@ -29,13 +31,15 @@ StrategyBuild::StrategyBuild()
 	this->gasGoal[4] = -1;
 	this->gasGoal[5] = -1;
 	this->gasGoal[6] = 100;
-	this->gasGoal[7] = 1000;
+	this->gasGoal[7] = 50;
+	this->gasGoal[8] = 1000;
 
 	for (int i = 0; i < buildings; i++)
 		this->uBuild[i] = NULL;
 
 	this->isCommandCenter = false;
 	this->isRefinary = false;
+	this->isBuildAddon = false;
 }
 
 StrategyBuild::~StrategyBuild()
@@ -67,6 +71,11 @@ bool StrategyBuild::getIsRefinary() const
 	return isRefinary;
 }
 
+bool StrategyBuild::getIsBuildAddon() const
+{
+	return isBuildAddon;
+}
+
 BWAPI::UnitType StrategyBuild::getCurrentBuild()
 {
 	if (buildStage < buildings)
@@ -93,14 +102,20 @@ void StrategyBuild::buildingBuilt()
 	this->buildStage++;
 	isCommandCenter = false;
 	isRefinary = false;
+	isBuildAddon = false;
 
 	if (buildOrder[buildStage] == BWAPI::UnitTypes::Enum::Terran_Command_Center)
 	{
 		isCommandCenter = true;
 	}
 	if (buildOrder[buildStage] == BWAPI::UnitTypes::Enum::Terran_Refinery)
+	{
 		this->isRefinary = true;
-
+	}
+	if (buildOrder[buildStage] == BWAPI::UnitTypes::Enum::Terran_Machine_Shop)
+	{
+		this->isBuildAddon = true;
+	}
 }
 
 int StrategyBuild::getBuildStage()
