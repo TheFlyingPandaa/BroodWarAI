@@ -5,7 +5,7 @@
 #include <BWAPI/UnitType.h>
 #include <BWAPI.h>
 
-const int buildings = 7;
+const int buildings = 8;
 
 
 

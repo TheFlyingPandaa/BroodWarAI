@@ -30,7 +30,7 @@ void ExampleAIModule::onStart()
 	
 
 
-	Broodwar->setLocalSpeed(0);	
+	Broodwar->setLocalSpeed(1);	
 
 	Broodwar->sendText("Hello world!");
 	//Enable flags
