@@ -237,7 +237,7 @@ void ExampleAIModule::onFrame()
 	
 		//_____________________________________________________________________________________________________________
 		if (Broodwar->self()->minerals() >= strategyBuild.getMiniralGoal() &&
-			strategyBuild.getMiniralGoal() != -1 && 
+			strategyBuild.getMiniralGoal() != -1 /*&& strategyBuild.getBuildStage() != NULL*/ &&
 			Broodwar->self()->gas() >= strategyBuild.getGasGoal() &&
 			(!building || building == NULL) &&
 			strategyBuild.getIsBuildAddon()  != true)
@@ -316,7 +316,7 @@ void ExampleAIModule::onFrame()
 			}
 		}
 	}
-	if (building){
+	if (building && builderUnit != NULL && tempUnit != NULL){
 		if (buildBuilding(builderUnit, tempUnit, tempDraw)){
 			building = false;
 
