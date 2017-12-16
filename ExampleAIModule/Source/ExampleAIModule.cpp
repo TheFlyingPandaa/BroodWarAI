@@ -12,12 +12,15 @@ TilePosition tempDraw;
 UnitType tempUnit;
 bool willDraw = false;
 bool done = false;
+bool donee = true;
 int tempInt = 0;
 
 bool building = NULL;
 
 const double maxDistanceFormBase = 1024;
 Position mainBase;
+
+
 
 
 //This is the startup method. It is called once
@@ -179,7 +182,10 @@ void ExampleAIModule::buildAddonBuilding()
 			{
 				unit->buildAddon(strategyBuild.getCurrentBuild());
 				
-				strategyBuild.buildingBuilt();
+				tempUnit = strategyBuild.getCurrentBuild();
+				building = true;
+
+				//strategyBuild.buildingBuilt();
 			}
 		}
 	}
@@ -204,32 +210,36 @@ void ExampleAIModule::onFrame()
 
 	if (Broodwar->getFrameCount() % 100 == 0)
 	{
-
+		donee = strategyBuild.canBuildSiege();
+		Broodwar->printf("%d", donee);
 		//_____________________________________________________________________________________________________________
 		if (Broodwar->self()->minerals() >= strategyTrain.getUnitCostGoal() &&
 			Broodwar->self()->gas() >= strategyTrain.getGasGoal() &&
 			strategyTrain.getTrainOrder() != -1)
-		{ 
-			Unit ubuild = NULL;
-			for (auto b : Broodwar->self()->getUnits())
-			{				
-				//WHY BE LIKE THE REST. NAHH PUT 0 AS FINNISHED EVER HEARD OF -1
-				if (b->getType() == strategyTrain.getUnitBuildning() &&
-					b->getRemainingBuildTime() < 1) {
-					if (ubuild == NULL)
-						ubuild = b;
-					/*else if (b->getPosition().getDistance(mainBase) < ubuild->getPosition().getDistance(mainBase))
-						ubuild = b;*/
-				}
-			}
-			if (ubuild != NULL) {
-				UnitType::list queueCheck = ubuild->getTrainingQueue();
-				if (queueCheck.size() <= 4)
+		{
+			if (strategyTrain.getTrainOrder() <= 1 || strategyTrain.getTrainOrder() >= 4 || donee)
+			{
+				Unit ubuild = NULL;
+				for (auto b : Broodwar->self()->getUnits())
 				{
-					ubuild->train(strategyTrain.getUnitOrder());
-					Broodwar->printf("Amount Of units left %d", strategyTrain.getAmountOfUnits());
-					Broodwar->printf("current Stage %d", strategyTrain.getTrainOrder());
-					strategyTrain.trainedUnit();
+					//WHY BE LIKE THE REST. NAHH PUT 0 AS FINNISHED EVER HEARD OF -1
+					if (b->getType() == strategyTrain.getUnitBuildning() &&
+						b->getRemainingBuildTime() < 1) {
+						if (ubuild == NULL)
+							ubuild = b;
+						/*else if (b->getPosition().getDistance(mainBase) < ubuild->getPosition().getDistance(mainBase))
+							ubuild = b;*/
+					}
+				}
+				if (ubuild != NULL) {
+					UnitType::list queueCheck = ubuild->getTrainingQueue();
+					if (queueCheck.size() <= 4)
+					{
+						ubuild->train(strategyTrain.getUnitOrder());
+						Broodwar->printf("Amount Of units left %d", strategyTrain.getAmountOfUnits());
+						Broodwar->printf("current Stage %d", strategyTrain.getTrainOrder());
+						strategyTrain.trainedUnit();
+					}
 				}
 			}
 		}
@@ -242,6 +252,8 @@ void ExampleAIModule::onFrame()
 			(!building || building == NULL) &&
 			strategyBuild.getIsBuildAddon()  != true)
 		{
+			
+			
 			
 			UnitType type = strategyBuild.getCurrentBuild();
 			TilePosition destPos;
@@ -316,6 +328,12 @@ void ExampleAIModule::onFrame()
 			}
 		}
 	}
+
+	if (strategyBuild.getBuildStage() >= 8)
+	{
+		Broodwar->setLocalSpeed(1);
+	}
+
 	if (building && builderUnit != NULL && tempUnit != NULL){
 		if (buildBuilding(builderUnit, tempUnit, tempDraw)){
 			building = false;

@@ -3,7 +3,7 @@
 #include <BWAPI/UnitType.h>
 
 
-const int amount = 4;
+const int amount = 5;
 
 class StrategyTrain
 {
@@ -16,6 +16,8 @@ public:
 
 	BWAPI::UnitType getUnitBuildning();
 	BWAPI::UnitType getUnitOrder();
+
+	bool canTankBuild();
 
 	int getUnitCostGoal();
 	int getGasGoal();
@@ -33,6 +35,7 @@ private:
 	int unitGasGoal[amount];
 	int amountOfUnits[amount];
 
+	bool siegeTank;
 };
 
 

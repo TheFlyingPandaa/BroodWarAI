@@ -24,11 +24,13 @@ public:
 	bool getIsRefinary() const;
 	bool getIsBuildAddon() const;
 
-
 	void buildingBuilt();
 
 	bool exists(BWAPI::Unit u) const;
 	void add(BWAPI::Unit u);
+
+	bool canBuildSiege();
+
 private:
 
 	//Pallar inte göra en Glass för detta

@@ -47,6 +47,19 @@ StrategyBuild::~StrategyBuild()
 	
 }
 
+bool StrategyBuild::canBuildSiege()
+{
+	if (buildStage >= 8)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+
 bool StrategyBuild::exists(BWAPI::Unit u) const{
 	
 	for (int i = 0; i < buildings; i++){
