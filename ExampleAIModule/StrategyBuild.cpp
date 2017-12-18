@@ -12,7 +12,8 @@ StrategyBuild::StrategyBuild()
 	this->buildOrder[5] = BWAPI::UnitTypes::Enum::Terran_Refinery;
 	this->buildOrder[6] = BWAPI::UnitTypes::Enum::Terran_Factory;
 	this->buildOrder[7] = BWAPI::UnitTypes::Enum::Terran_Machine_Shop;
-	this->buildOrder[8] = BWAPI::UnitTypes::Enum::Terran_Factory; //Som sagt Ha alltid 1 extra
+	this->buildOrder[8] = BWAPI::UnitTypes::Enum::Terran_Supply_Depot;
+	this->buildOrder[9] = BWAPI::UnitTypes::Enum::Terran_Factory; //Som sagt Ha alltid 1 extra
 
 	this->miniralGoal[0] = 100;	//Supply
 	this->miniralGoal[1] = 100;	//Supply
@@ -22,7 +23,8 @@ StrategyBuild::StrategyBuild()
 	this->miniralGoal[5] = 100; //Refinary
 	this->miniralGoal[6] = 200; //Factory
 	this->miniralGoal[7] = 50; //Factory
-	this->miniralGoal[8] = 20000; //Detta är något lösligt bara så att den inte ska crascha
+	this->miniralGoal[8] = 100; //Factory
+	this->miniralGoal[9] = 20000; //Detta är något lösligt bara så att den inte ska crascha
 
 	this->gasGoal[0] = -1;
 	this->gasGoal[1] = -1;
@@ -32,7 +34,8 @@ StrategyBuild::StrategyBuild()
 	this->gasGoal[5] = -1;
 	this->gasGoal[6] = 100;
 	this->gasGoal[7] = 50;
-	this->gasGoal[8] = 1000;
+	this->gasGoal[8] = -1;
+	this->gasGoal[9] = 1000;
 
 	for (int i = 0; i < buildings; i++)
 		this->uBuild[i] = NULL;
@@ -49,7 +52,7 @@ StrategyBuild::~StrategyBuild()
 
 bool StrategyBuild::canBuildSiege()
 {
-	if (buildStage >= 8)
+	if (buildStage >= 9)
 	{
 		return true;
 	}

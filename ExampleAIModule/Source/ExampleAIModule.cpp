@@ -211,13 +211,15 @@ void ExampleAIModule::onFrame()
 	if (Broodwar->getFrameCount() % 100 == 0)
 	{
 		donee = strategyBuild.canBuildSiege();
-		Broodwar->printf("%d", donee);
+		//Broodwar->printf("%d", donee);
+		Broodwar->printf("%d", strategyTrain.getTrainOrder());
 		//_____________________________________________________________________________________________________________
 		if (Broodwar->self()->minerals() >= strategyTrain.getUnitCostGoal() &&
 			Broodwar->self()->gas() >= strategyTrain.getGasGoal() &&
 			strategyTrain.getTrainOrder() != -1)
 		{
-			if (strategyTrain.getTrainOrder() <= 1 || strategyTrain.getTrainOrder() >= 4 || donee)
+			
+			if (strategyTrain.getTrainOrder() <= 1 || strategyTrain.getTrainOrder() >= 3 || donee)
 			{
 				Unit ubuild = NULL;
 				for (auto b : Broodwar->self()->getUnits())
