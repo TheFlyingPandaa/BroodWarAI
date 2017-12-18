@@ -24,6 +24,11 @@ Position mainBase;
 
 Position chokeHold;
 
+bool attackEnemy = false;
+Unit badGuy;
+
+//Unit allOwnUnits[20];
+
 
 //This is the startup method. It is called once
 //when a new game has been started with the bot.
@@ -94,7 +99,7 @@ Position ExampleAIModule::findGuardPoint()
 		}
 	}
 	co = choke->getCenter();
-	co.x += 60;
+	co.x += 60; //Why this. Man kan spawna på 2 pos. #tttrrraiilllleleleeeeeand errroorororor
 	co.y += 60;
 	return co;
 }
@@ -237,6 +242,59 @@ void ExampleAIModule::setRallyPoint()
 	
 }
 
+void ExampleAIModule::unitAction()
+{
+	
+	for (auto unit : Broodwar->getAllUnits())
+	{
+		if (unit->getPlayer() != Broodwar->self())
+		{
+			if (unit->getResources() < 1)
+			{
+				badGuy = unit;
+				attackEnemy = true;
+				break;
+			}
+			else
+			{
+				attackEnemy = false;
+			}
+
+		}
+	}
+
+	if (attackEnemy == true)
+	{
+		for (auto unit : Broodwar->self()->getUnits())
+		{
+			if (unit->getResources() < 1)
+			{
+				if (unit->getType().isWorker() == false)
+				{
+					Broodwar->drawCircle(CoordinateType::Map, unit->getPosition().x, unit->getPosition().y, 15, Colors::Blue, false);
+
+					unit->attack(badGuy);
+				}
+			}
+		}
+	}
+	else
+	{
+		for (auto unit : Broodwar->self()->getUnits())
+		{
+			if (unit->getResources() < 1)
+			{
+				if (unit->getType().isWorker() == false)
+				{
+					Broodwar->drawCircle(CoordinateType::Map, unit->getPosition().x, unit->getPosition().y, 15, Colors::Blue, false);
+					//unit->move(Position(unit->getPosition().x + 1, unit->getPosition().y));
+				}
+			}
+		}
+	}
+
+}
+
 
 
 //This is the method called each frame. This is where the bot's logic
@@ -252,10 +310,12 @@ void ExampleAIModule::onFrame()
 	Broodwar->drawCircle(CoordinateType::Map, mainBase.x, mainBase.y, 10, Colors::Green, true);
 	drawTerrainData();
 
-
+	unitAction();
 
 	if (Broodwar->getFrameCount() % 100 == 0)
 	{
+
+		
 		
 		//For the SigeTanks
 		if (jumpResearch == false)
@@ -391,7 +451,17 @@ void ExampleAIModule::onFrame()
 		Broodwar->setLocalSpeed(1);
 	}
 
-
+	for (auto unit : Broodwar->getAllUnits())
+	{
+		if (unit->getPlayer() != Broodwar->self())
+		{
+			if (unit->getResources() < 1)
+			{
+				Broodwar->drawCircle(CoordinateType::Map, unit->getPosition().x, unit->getPosition().y, 15, Colors::Red, false);
+			}
+			
+		}
+	}
 
 	if (building && builderUnit != NULL && tempUnit != NULL){
 		if (buildBuilding(builderUnit, tempUnit, tempDraw)){
@@ -748,6 +818,8 @@ void ExampleAIModule::showForces()
 void ExampleAIModule::onUnitComplete(BWAPI::Unit unit)
 {
 	Broodwar->sendText("A %s [%x] has been completed at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x,unit->getPosition().y);
+
+	
 
 	for (auto unit : Broodwar->self()->getUnits())
 	{

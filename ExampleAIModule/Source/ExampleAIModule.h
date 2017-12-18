@@ -62,6 +62,8 @@ public:
 
 	void setRallyPoint();
 
+	void unitAction();
+
 private:
 	int amountOfWorkes;
 	StrategyBuild strategyBuild;
