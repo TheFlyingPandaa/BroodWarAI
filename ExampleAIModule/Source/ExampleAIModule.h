@@ -60,6 +60,8 @@ public:
 
 	void researchSiegeMode();
 
+	void setRallyPoint();
+
 private:
 	int amountOfWorkes;
 	StrategyBuild strategyBuild;

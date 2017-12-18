@@ -7,9 +7,9 @@ StrategyBuild::StrategyBuild()
 	this->buildOrder[0] = BWAPI::UnitTypes::Enum::Terran_Supply_Depot;
 	this->buildOrder[1] = BWAPI::UnitTypes::Enum::Terran_Supply_Depot;
 	this->buildOrder[2] = BWAPI::UnitTypes::Enum::Terran_Barracks;
-	this->buildOrder[3] = BWAPI::UnitTypes::Enum::Terran_Command_Center;
+	this->buildOrder[3] = BWAPI::UnitTypes::Enum::Terran_Refinery;
 	this->buildOrder[4] = BWAPI::UnitTypes::Enum::Terran_Academy;
-	this->buildOrder[5] = BWAPI::UnitTypes::Enum::Terran_Refinery;
+	this->buildOrder[5] = BWAPI::UnitTypes::Enum::Terran_Command_Center;
 	this->buildOrder[6] = BWAPI::UnitTypes::Enum::Terran_Factory;
 	this->buildOrder[7] = BWAPI::UnitTypes::Enum::Terran_Machine_Shop;
 	this->buildOrder[8] = BWAPI::UnitTypes::Enum::Terran_Supply_Depot;
@@ -18,9 +18,9 @@ StrategyBuild::StrategyBuild()
 	this->miniralGoal[0] = 100;	//Supply
 	this->miniralGoal[1] = 100;	//Supply
 	this->miniralGoal[2] = 150;	//Barrack
-	this->miniralGoal[3] = 400;	//Command Center
+	this->miniralGoal[3] = 100; //Refinary
 	this->miniralGoal[4] = 150; //Academy
-	this->miniralGoal[5] = 100; //Refinary
+	this->miniralGoal[5] = 400;	//Command Center
 	this->miniralGoal[6] = 200; //Factory
 	this->miniralGoal[7] = 50; //Factory
 	this->miniralGoal[8] = 100; //Factory
@@ -98,6 +98,11 @@ BWAPI::UnitType StrategyBuild::getCurrentBuild()
 		return buildOrder[buildStage];
 	else
 		return NULL;
+}
+
+BWAPI::UnitType StrategyBuild::getBuildStage(int num)
+{
+	return buildOrder[num];
 }
 
 int StrategyBuild::getMiniralGoal()

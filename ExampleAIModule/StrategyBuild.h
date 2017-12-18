@@ -16,6 +16,8 @@ public:
 	~StrategyBuild();
 
 	BWAPI::UnitType getCurrentBuild();
+	BWAPI::UnitType getBuildStage(int num);
+
 	int getMiniralGoal();
 	int getGasGoal();
 

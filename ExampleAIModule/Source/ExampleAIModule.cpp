@@ -22,7 +22,7 @@ bool building = NULL;
 const double maxDistanceFormBase = 1024;
 Position mainBase;
 
-
+Position chokeHold;
 
 
 //This is the startup method. It is called once
@@ -59,6 +59,8 @@ void ExampleAIModule::onStart()
 	sendWorkersToMinirals();
 
 	mainBase = Broodwar->self()->getUnits().getPosition();
+
+	chokeHold = findGuardPoint();
 }
 
 //Called when a game is ended.
@@ -80,7 +82,7 @@ Position ExampleAIModule::findGuardPoint()
 	std::set<BWTA::Chokepoint*> chokepoints = home->getChokepoints();
 	double min_length = 10000;
 	BWTA::Chokepoint* choke = NULL;
-
+	Position co;
 	//Iterate through all chokepoints and look for the one with the smallest gap (least width)
 	for (std::set<BWTA::Chokepoint*>::iterator c = chokepoints.begin(); c != chokepoints.end(); c++)
 	{
@@ -91,8 +93,10 @@ Position ExampleAIModule::findGuardPoint()
 			choke = *c;
 		}
 	}
-
-	return choke->getCenter();
+	co = choke->getCenter();
+	co.x += 60;
+	co.y += 60;
+	return co;
 }
 
 void ExampleAIModule::sendWorkersToMinirals()
@@ -212,6 +216,25 @@ void ExampleAIModule::researchSiegeMode()
 			}
 		}
 	}
+}
+
+void ExampleAIModule::setRallyPoint()
+{
+	//if (strategyBuild.getBuildStage(strategyBuild.getBuildStage() - 1) == UnitTypes::Enum::Terran_Barracks)
+	//{
+		for (auto unit : Broodwar->self()->getUnits())
+		{
+			if (unit->getType() == UnitTypes::Enum::Terran_Barracks)
+			{
+				unit->setRallyPoint(chokeHold);
+			}
+			if (unit->getType() == UnitTypes::Enum::Terran_Factory)
+			{
+				unit->setRallyPoint(chokeHold);
+			}
+		}
+	//}
+	
 }
 
 
@@ -368,6 +391,8 @@ void ExampleAIModule::onFrame()
 		Broodwar->setLocalSpeed(1);
 	}
 
+
+
 	if (building && builderUnit != NULL && tempUnit != NULL){
 		if (buildBuilding(builderUnit, tempUnit, tempDraw)){
 			building = false;
@@ -384,6 +409,7 @@ void ExampleAIModule::onFrame()
 						strategyBuild.add(b);
 						strategyBuild.buildingBuilt();
 						Broodwar->printf("Build stage %i Complete", strategyBuild.getBuildStage());
+						setRallyPoint();
 					}
 				}
 			}
