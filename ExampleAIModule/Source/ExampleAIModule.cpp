@@ -15,6 +15,8 @@ bool done = false;
 bool donee = true;
 int tempInt = 0;
 
+bool jumpResearch = false;
+
 bool building = NULL;
 
 const double maxDistanceFormBase = 1024;
@@ -191,6 +193,27 @@ void ExampleAIModule::buildAddonBuilding()
 	}
 }
 
+void ExampleAIModule::researchSiegeMode()
+{
+
+	for (auto u : Broodwar->self()->getUnits())
+	{
+		if (u->getType() == UnitTypes::Enum::Terran_Machine_Shop)
+		{
+			Broodwar->printf("%d", u->getRemainingBuildTime());
+			if (u->getRemainingBuildTime() == 0)
+			{
+				if (Broodwar->self()->gas() >= 150)
+				{
+					u->research(TechTypes::Enum::Tank_Siege_Mode);
+					jumpResearch = true;
+				}
+
+			}
+		}
+	}
+}
+
 
 
 //This is the method called each frame. This is where the bot's logic
@@ -210,9 +233,18 @@ void ExampleAIModule::onFrame()
 
 	if (Broodwar->getFrameCount() % 100 == 0)
 	{
+		
+		//For the SigeTanks
+		if (jumpResearch == false)
+		{
+			researchSiegeMode();
+		}
+		
+
+
 		donee = strategyBuild.canBuildSiege();
 		//Broodwar->printf("%d", donee);
-		Broodwar->printf("%d", strategyTrain.getTrainOrder());
+		//Broodwar->printf("%d", strategyTrain.getTrainOrder());
 		//_____________________________________________________________________________________________________________
 		if (Broodwar->self()->minerals() >= strategyTrain.getUnitCostGoal() &&
 			Broodwar->self()->gas() >= strategyTrain.getGasGoal() &&
@@ -495,7 +527,7 @@ void ExampleAIModule::onUnitCreate(BWAPI::Unit unit)
 	{
 		Broodwar->sendText("A %s [%x] has been created at (%d,%d)", unit->getType().getName().c_str(), unit, unit->getPosition().x, unit->getPosition().y);
 	}
-
+	/*
 	for (auto u : Broodwar->self()->getUnits())
 	{
 		//Check if unit is a Marine
@@ -507,7 +539,7 @@ void ExampleAIModule::onUnitCreate(BWAPI::Unit unit)
 			u->rightClick(guardPoint);
 		}
 	}
-
+	*/
 	for (auto unit : Broodwar->self()->getUnits())
 	{
 		if (unit->isIdle())

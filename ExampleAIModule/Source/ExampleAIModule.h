@@ -58,6 +58,8 @@ public:
 
 	void buildAddonBuilding();
 
+	void researchSiegeMode();
+
 private:
 	int amountOfWorkes;
 	StrategyBuild strategyBuild;
