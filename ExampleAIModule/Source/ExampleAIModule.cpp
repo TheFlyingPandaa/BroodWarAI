@@ -25,9 +25,12 @@ Position mainBase;
 Position chokeHold;
 
 bool attackEnemy = false;
-Unit badGuy;
+Unit badGuy = NULL;
 
-//Unit allOwnUnits[20];
+Unit allOwnUnits[100];
+int amountOfUnits = 0;
+
+bool doOnce = true;
 
 
 //This is the startup method. It is called once
@@ -66,6 +69,11 @@ void ExampleAIModule::onStart()
 	mainBase = Broodwar->self()->getUnits().getPosition();
 
 	chokeHold = findGuardPoint();
+
+	for (size_t i = 0; i < 100; i++)
+	{
+		allOwnUnits[i] = NULL;
+	}
 }
 
 //Called when a game is ended.
@@ -244,39 +252,118 @@ void ExampleAIModule::setRallyPoint()
 
 void ExampleAIModule::unitAction()
 {
-	
-	for (auto unit : Broodwar->getAllUnits())
+	Unit tempUni = NULL;
+	if (badGuy != NULL)
 	{
-		if (unit->getPlayer() != Broodwar->self())
-		{
-			if (unit->getResources() < 1)
+		if (badGuy->getHitPoints() < 1)
+		{	
+			for (auto unit : Broodwar->getAllUnits())
 			{
-				badGuy = unit;
-				attackEnemy = true;
-				break;
-			}
-			else
-			{
-				attackEnemy = false;
-			}
+				if (unit->getPlayer() != Broodwar->self())
+				{
+					if (unit->getResources() < 1)
+					{
+						tempUni = unit;
+						badGuy = unit;
+						attackEnemy = true;
+						break;
+					}
+					else
+					{
+						attackEnemy = false;
+					}
 
+				}
+			}
 		}
+	}
+	else
+	{
+			for (auto unit : Broodwar->getAllUnits())
+			{
+				if (unit->getPlayer() != Broodwar->self())
+				{
+					if (unit->getResources() < 1)
+					{
+						Broodwar->setLocalSpeed(1);
+						badGuy = unit;
+						attackEnemy = true;
+						break;
+					}
+					else
+					{
+						attackEnemy = false;
+					}
+
+				}
+			}
+		
 	}
 
 	if (attackEnemy == true)
 	{
-		for (auto unit : Broodwar->self()->getUnits())
-		{
-			if (unit->getResources() < 1)
+		
+			for (auto unit : Broodwar->self()->getUnits())
 			{
-				if (unit->getType().isWorker() == false)
+				if (unit->getResources() < 1)
 				{
-					Broodwar->drawCircle(CoordinateType::Map, unit->getPosition().x, unit->getPosition().y, 15, Colors::Blue, false);
+					if (unit->getType().isWorker() == false)
+					{
+						if (unit->getDistance(badGuy->getPosition()) > 500)
+						{
+							Broodwar->drawCircle(CoordinateType::Map, unit->getPosition().x, unit->getPosition().y, 15, Colors::Purple, false);
+							
+							if (unit->canSiege())
+							{
+								if (unit->isSieged() == true)
+								{
+									unit->siege();
+								}
+								else
+								{
+									unit->move(badGuy->getPosition());
+								}
+							}
+							else
+							{
+								unit->move(badGuy->getPosition());
+							}
+							doOnce = true;
+						}
+						else
+						{
+							if (doOnce == true)
+							{
+								if (unit->canSiege())
+								{
+									if (unit->isSieged() == false)
+									{
+										unit->siege();
+									}
+									else
+									{
+										//unit->move(unit->getPosition());
+										//unit->holdPosition();
+										unit->attack(badGuy);
+										doOnce = false;
+									}
 
-					unit->attack(badGuy);
+								}
+								else
+								{
+									Broodwar->printf("FUCKING");
+									//unit->attack(badGuy);
+									//unit->move(unit->getPosition());
+									//unit->holdPosition();
+									unit->attack(badGuy);
+									doOnce = false;
+								}
+							}
+						}
+					}
 				}
 			}
-		}
+		
 	}
 	else
 	{
@@ -286,8 +373,34 @@ void ExampleAIModule::unitAction()
 			{
 				if (unit->getType().isWorker() == false)
 				{
-					Broodwar->drawCircle(CoordinateType::Map, unit->getPosition().x, unit->getPosition().y, 15, Colors::Blue, false);
-					//unit->move(Position(unit->getPosition().x + 1, unit->getPosition().y));
+					if (unit->getType().isBuilding() == false)
+					{
+						Broodwar->drawCircle(CoordinateType::Map, unit->getPosition().x, unit->getPosition().y, 15, Colors::Blue, false);
+						//unit->move(Position(unit->getPosition().x + 1, unit->getPosition().y));
+						//unit->stop();
+					}
+				}
+			}
+		}
+	}
+
+}
+
+void ExampleAIModule::checkUnits()
+{
+	amountOfUnits = 0;
+	for (auto unit : Broodwar->self()->getUnits())
+	{
+		if (unit->getPlayer() == Broodwar->self())
+		{
+			if (unit->getResources() < 1)
+			{
+				if (unit->getType().isWorker() == false)
+				{
+					if (unit->getType().isBuilding() == false)
+					{
+						amountOfUnits++;
+					}
 				}
 			}
 		}
@@ -314,9 +427,9 @@ void ExampleAIModule::onFrame()
 
 	if (Broodwar->getFrameCount() % 100 == 0)
 	{
+		checkUnits();
+		Broodwar->printf("How meny units %d", amountOfUnits);
 
-		
-		
 		//For the SigeTanks
 		if (jumpResearch == false)
 		{

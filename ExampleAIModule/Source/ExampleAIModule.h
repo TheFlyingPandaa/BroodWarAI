@@ -63,6 +63,7 @@ public:
 	void setRallyPoint();
 
 	void unitAction();
+	void checkUnits();
 
 private:
 	int amountOfWorkes;
