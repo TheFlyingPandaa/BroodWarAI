@@ -307,7 +307,7 @@ void ExampleAIModule::unitAction()
 			{
 				if (unit->getResources() < 1)
 				{
-					if (unit->getType().isWorker() == false)
+					if (unit->getType().isWorker() == false && unit->getType().isBuilding() == false)
 					{
 						if (unit->getDistance(badGuy->getPosition()) > 500)
 						{
@@ -342,7 +342,7 @@ void ExampleAIModule::unitAction()
 									}
 									else
 									{
-										//unit->move(unit->getPosition());
+										unit->move(unit->getPosition());
 										//unit->holdPosition();
 										unit->attack(badGuy);
 										doOnce = false;
@@ -353,7 +353,7 @@ void ExampleAIModule::unitAction()
 								{
 									Broodwar->printf("FUCKING");
 									//unit->attack(badGuy);
-									//unit->move(unit->getPosition());
+									unit->move(unit->getPosition());
 									//unit->holdPosition();
 									unit->attack(badGuy);
 									doOnce = false;
