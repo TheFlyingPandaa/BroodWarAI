@@ -27,7 +27,7 @@ Position chokeHold;
 bool attackEnemy = false;
 Unit badGuy = NULL;
 
-Unit allOwnUnits[100];
+Unit supreamLeader = NULL; //KIM JONG UNNN YEAHHHH
 int amountOfUnits = 0;
 
 bool doOnce = true;
@@ -69,11 +69,6 @@ void ExampleAIModule::onStart()
 	mainBase = Broodwar->self()->getUnits().getPosition();
 
 	chokeHold = findGuardPoint();
-
-	for (size_t i = 0; i < 100; i++)
-	{
-		allOwnUnits[i] = NULL;
-	}
 }
 
 //Called when a game is ended.
@@ -285,10 +280,18 @@ void ExampleAIModule::unitAction()
 				{
 					if (unit->getResources() < 1)
 					{
+		
 						Broodwar->setLocalSpeed(1);
-						badGuy = unit;
+						tempUni = unit;
 						attackEnemy = true;
-						break;
+						if (badGuy != NULL)
+						{
+						
+						}
+						else
+						{
+							badGuy = unit;
+						}
 					}
 					else
 					{
@@ -415,6 +418,24 @@ void ExampleAIModule::checkUnits()
 void ExampleAIModule::onFrame()
 {
 
+	for (auto unit : Broodwar->self()->getUnits())
+	{
+		if (unit->getPlayer() == Broodwar->self())
+		{
+			if (unit->getResources() < 1)
+			{
+				if (unit->getType().isWorker() == false)
+				{
+					if (unit->getType().isBuilding() == false)
+					{
+						supreamLeader = unit;
+						break;
+					}
+				}
+			}
+		}
+	}
+
 	
 	//buildCommandCenter();
 	//Call every 100:th frame
@@ -423,7 +444,11 @@ void ExampleAIModule::onFrame()
 	Broodwar->drawCircle(CoordinateType::Map, mainBase.x, mainBase.y, 10, Colors::Green, true);
 	drawTerrainData();
 
-	unitAction();
+	if (Broodwar->getFrameCount() % 5 == 0)
+	{
+		unitAction();
+	}
+	
 
 	if (Broodwar->getFrameCount() % 100 == 0)
 	{
