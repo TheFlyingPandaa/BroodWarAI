@@ -64,6 +64,7 @@ public:
 
 	void unitAction();
 	void checkUnits();
+	void unitRoaming();
 
 private:
 	int amountOfWorkes;

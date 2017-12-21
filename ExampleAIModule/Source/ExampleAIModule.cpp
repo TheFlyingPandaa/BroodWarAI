@@ -32,6 +32,11 @@ int amountOfUnits = 0;
 
 bool doOnce = true;
 
+Position romePosition = Position(-1,-1);
+
+Position visitedRoam[10];
+int amountOfVisit = 0;
+
 
 //This is the startup method. It is called once
 //when a new game has been started with the bot.
@@ -324,12 +329,20 @@ void ExampleAIModule::unitAction()
 								}
 								else
 								{
-									unit->move(badGuy->getPosition());
+									if (unit->isAttackFrame() == false)
+									{
+										unit->move(badGuy->getPosition());
+
+									}
 								}
+
 							}
 							else
 							{
-								unit->move(badGuy->getPosition());
+								if (unit->isAttackFrame() == false)
+								{
+									unit->move(badGuy->getPosition());
+								}
 							}
 							doOnce = true;
 						}
@@ -358,7 +371,11 @@ void ExampleAIModule::unitAction()
 									//unit->attack(badGuy);
 									unit->move(unit->getPosition());
 									//unit->holdPosition();
-									unit->attack(badGuy);
+									if (unit->isAttackFrame() == false)
+									{
+										unit->attack(badGuy);
+									}
+									//unit->attack(badGuy);
 									doOnce = false;
 								}
 							}
@@ -372,13 +389,20 @@ void ExampleAIModule::unitAction()
 	{
 		for (auto unit : Broodwar->self()->getUnits())
 		{
-			if (unit->getResources() < 1)
+			if (unit->isAttackFrame() == false)
 			{
-				if (unit->getType().isWorker() == false)
+				if (unit->getResources() < 1)
 				{
-					if (unit->getType().isBuilding() == false)
+					if (unit->getType().isWorker() == false && unit->getType().isBuilding() == false)
 					{
 						Broodwar->drawCircle(CoordinateType::Map, unit->getPosition().x, unit->getPosition().y, 15, Colors::Blue, false);
+
+						if (amountOfUnits >= 9)
+						{
+							unitRoaming();
+							unit->move(romePosition);
+						}
+
 						//unit->move(Position(unit->getPosition().x + 1, unit->getPosition().y));
 						//unit->stop();
 					}
@@ -408,6 +432,62 @@ void ExampleAIModule::checkUnits()
 			}
 		}
 	}
+
+}
+
+void ExampleAIModule::unitRoaming()
+{
+	if (romePosition.x == -1 && romePosition.y == -1)
+	{
+		for (auto base : BWTA::getBaseLocations())
+		{
+			if (mainBase.getDistance(base->getPosition()) > 100) 
+			{
+				romePosition = base->getPosition();
+				break;
+			}
+		}
+	}
+
+	bool tempBool = true;
+
+	if (supreamLeader->getDistance(romePosition) < 100)
+	{
+		visitedRoam[amountOfVisit] = romePosition;
+		amountOfVisit++;
+		if (amountOfVisit >= 10)
+		{
+			for (size_t i = 0; i < 10; i++) {
+				visitedRoam[i] = Position(1, 1);
+			}
+			amountOfVisit = 0;
+		}
+
+		for (auto base : BWTA::getBaseLocations())
+		{
+			if (mainBase.getDistance(base->getPosition()) > 100)
+			{
+
+				for (size_t i = 0; i < 10; i++)
+				{
+					if (visitedRoam[i] == base->getPosition())
+					{
+						tempBool = false;
+					}
+				}
+				if (tempBool == true)
+				{
+					romePosition = base->getPosition();
+				}
+				else
+				{
+					tempBool = true;
+				}
+			}
+		}
+
+	}
+
 
 }
 
