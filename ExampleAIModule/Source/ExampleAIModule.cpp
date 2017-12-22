@@ -292,6 +292,10 @@ void ExampleAIModule::unitAction()
 						attackEnemy = true;
 						if (badGuy != NULL)
 						{
+							if (tempUni->getDistance(supreamLeader->getPosition()) < badGuy->getDistance(supreamLeader->getPosition()))
+							{
+								badGuy = unit;
+							}
 						
 						}
 						else
@@ -307,6 +311,14 @@ void ExampleAIModule::unitAction()
 				}
 			}
 		
+	}
+
+	if (badGuy != NULL)
+	{
+		if (badGuy->getHitPoints() > 0)
+		{
+			attackEnemy = true;
+		}
 	}
 
 	if (attackEnemy == true)
@@ -368,12 +380,12 @@ void ExampleAIModule::unitAction()
 								}
 								else
 								{
-									Broodwar->printf("FUCKING");
+									//Broodwar->printf("FUCKING");
 									//unit->attack(badGuy);
-									unit->move(unit->getPosition());
 									//unit->holdPosition();
 									if (unit->isAttackFrame() == false)
 									{
+										unit->holdPosition();
 										unit->attack(badGuy);
 									}
 									//unit->attack(badGuy);
@@ -397,12 +409,15 @@ void ExampleAIModule::unitAction()
 					if (unit->getType().isWorker() == false && unit->getType().isBuilding() == false)
 					{
 						Broodwar->drawCircle(CoordinateType::Map, unit->getPosition().x, unit->getPosition().y, 15, Colors::Blue, false);
-
-						if (amountOfUnits >= 9)
+						if (unit->isAttackFrame() == false)
 						{
-							unitRoaming();
-							unit->move(romePosition);
+							if (amountOfUnits >= 9)
+							{
+								unitRoaming();
+								unit->move(romePosition);
+							}
 						}
+						
 
 						//unit->move(Position(unit->getPosition().x + 1, unit->getPosition().y));
 						//unit->stop();
@@ -452,7 +467,7 @@ void ExampleAIModule::unitRoaming()
 
 	bool tempBool = true;
 
-	if (supreamLeader->getDistance(romePosition) < 100)
+	if (supreamLeader->getDistance(romePosition) < 300)
 	{
 		visitedRoam[amountOfVisit] = romePosition;
 		amountOfVisit++;
