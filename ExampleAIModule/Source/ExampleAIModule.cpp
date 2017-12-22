@@ -29,13 +29,14 @@ Unit badGuy = NULL;
 
 Unit supreamLeader = NULL; //KIM JONG UNNN YEAHHHH
 int amountOfUnits = 0;
-
 bool doOnce = true;
-
 Position romePosition = Position(-1,-1);
-
 Position visitedRoam[10];
 int amountOfVisit = 0;
+
+Unit secondBase = NULL;
+
+int spawnUnits = 0;
 
 
 //This is the startup method. It is called once
@@ -532,6 +533,16 @@ void ExampleAIModule::onFrame()
 
 	if (Broodwar->getFrameCount() % 100 == 0)
 	{
+
+		if (secondBase != NULL)
+		{
+			if (spawnUnits <= 4)
+			{
+				secondBase->train(UnitTypes::Enum::Terran_SCV);
+				spawnUnits++;
+			}
+		}
+
 		checkUnits();
 		Broodwar->printf("How meny units %d", amountOfUnits);
 
@@ -697,6 +708,10 @@ void ExampleAIModule::onFrame()
 						strategyBuild.add(b);
 						strategyBuild.buildingBuilt();
 						Broodwar->printf("Build stage %i Complete", strategyBuild.getBuildStage());
+						if (b->getType() == UnitTypes::Enum::Terran_Command_Center)
+						{
+							secondBase = b;
+						}
 						setRallyPoint();
 					}
 				}
